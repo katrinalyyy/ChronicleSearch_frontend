@@ -1,0 +1,324 @@
+basePath: /
+definitions:
+  ds.ChronicleResource:
+    properties:
+      author:
+        type: string
+      date_of_creation:
+        type: string
+      detailed_description:
+        type: string
+      detailed_editions:
+        type: string
+      detailed_significance:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      location:
+        type: string
+      time_of_action:
+        type: string
+      title:
+        type: string
+    type: object
+  handler.loginReq:
+    properties:
+      login:
+        example: max
+        type: string
+      password:
+        example: "123"
+        type: string
+    type: object
+  handler.loginResp:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      expires_in:
+        example: 3600000000000
+        type: integer
+      token_type:
+        example: Bearer
+        type: string
+    type: object
+  handler.registerReq:
+    properties:
+      name:
+        example: testuser
+        type: string
+      pass:
+        example: password123
+        type: string
+    type: object
+  handler.registerResp:
+    properties:
+      ok:
+        example: true
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@chroniclesearch.ru
+    name: API Support
+  description: REST API для системы поиска и управления историческими хрониками
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: ChronicleSearch API
+  version: "1.0"
+paths:
+  /api/ChronicleRequestList:
+    get:
+      consumes:
+      - application/json
+      description: Получить список заявок (для пользователя - только свои, для модератора
+        - все)
+      parameters:
+      - description: Фильтр по статусу
+        in: query
+        name: status
+        type: string
+      - description: Дата начала (YYYY-MM-DD)
+        in: query
+        name: start_date
+        type: string
+      - description: Дата окончания (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить список заявок
+      tags:
+      - ChronicleRequestList
+  /api/ChronicleRequestList/{id_chronicle_request}/chronicle_complete-or-reject:
+    put:
+      consumes:
+      - application/json
+      description: Завершение или отклонение заявки (только для модератора)
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id_chronicle_request
+        required: true
+        type: integer
+      - description: 'Действие: complete или reject'
+        in: body
+        name: action
+        required: true
+        schema:
+          properties:
+            action:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: error - не модератор
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Завершить или отклонить заявку
+      tags:
+      - ChronicleRequestList
+  /api/chronicle_resources:
+    get:
+      consumes:
+      - application/json
+      description: Получить список всех хроник с возможностью фильтрации по названию,
+        автору и локации
+      parameters:
+      - description: Фильтр по названию
+        in: query
+        name: title
+        type: string
+      - description: Фильтр по автору
+        in: query
+        name: author
+        type: string
+      - description: Фильтр по локации
+        in: query
+        name: location
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить список хроник
+      tags:
+      - chronicle_resources
+    post:
+      consumes:
+      - application/json
+      description: Создание новой хроники (требуется авторизация)
+      parameters:
+      - description: Данные хроники
+        in: body
+        name: chronicle
+        required: true
+        schema:
+          $ref: '#/definitions/ds.ChronicleResource'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать хронику
+      tags:
+      - chronicle_resources
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Аутентификация пользователя и получение JWT токена
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.loginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.loginResp'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Вход пользователя
+      tags:
+      - auth
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Добавление JWT токена в блеклист (logout)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Выход пользователя
+      tags:
+      - auth
+  /sign_up:
+    post:
+      consumes:
+      - application/json
+      description: Создание нового пользователя с ролью Buyer
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.registerReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.registerResp'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация нового пользователя
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    description: 'Введите токен в формате: Bearer {токен}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,26 @@
+# Переменные окружения
+.env
+
+# Бинарные файлы
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Тестовые файлы
+*.test
+
+# Output
+*.out
+/tmp/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Go
+vendor/
