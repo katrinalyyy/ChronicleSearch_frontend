@@ -4,7 +4,8 @@ import { Row, Col, Spinner, Image } from 'react-bootstrap'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import Breadcrumbs from '../components/Breadcrumbs'
-import { getChronicleById, type ChronicleResource } from '../modules/chronicleApi'
+import ResearchCartButton from '../components/ResearchCartButton'
+import { getChronicleById, getChronicleResearchDraft, type ChronicleResource } from '../modules/chronicleApi'
 import { ROUTES, ROUTE_LABELS } from '../Routes'
 import { defaultImage } from '../constants/defaultImage'
 import './ChronicleDetailPage.css'
@@ -12,6 +13,7 @@ import './ChronicleDetailPage.css'
 const ChronicleDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>()
   const [pageData, setPageData] = useState<ChronicleResource | null>(null)
+  const [cartCount, setCartCount] = useState(0)
 
   useEffect(() => {
     // Загрузка данных летописи при монтировании компонента
@@ -20,11 +22,34 @@ const ChronicleDetailPage: FC = () => {
         setPageData(data)
       })
     }
+    loadCartInfo()
   }, [id])
+
+  // Загрузка информации о корзине
+  const loadCartInfo = () => {
+    getChronicleResearchDraft()
+      .then((data) => {
+        if (data) {
+          setCartCount(data.count)
+        } else {
+          setCartCount(0)
+        }
+      })
+      .catch(() => {
+        setCartCount(0)
+      })
+  }
+
+  // Обработчик клика на корзину
+  const handleCartClick = () => {
+    console.log('Cart clicked - sending GET request to /api/ChronicleRequestList/chronicle_draft')
+    loadCartInfo() // Перезагружаем информацию о корзине
+  }
 
   return (
     <>
       <Header />
+      <ResearchCartButton count={cartCount} onClick={handleCartClick} />
       
       {/* Пример использования BreadCrumbs на странице летописи (название получаем из запроса) */}
       <Breadcrumbs

@@ -5,24 +5,43 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import ChronicleCard from '../components/ChronicleCard'
 import Breadcrumbs from '../components/Breadcrumbs'
-import { getChronicles, type ChronicleResource } from '../modules/chronicleApi'
+import ResearchCartButton from '../components/ResearchCartButton'
+import { getChronicles, getChronicleResearchDraft, type ChronicleResource } from '../modules/chronicleApi'
 import { ROUTE_LABELS } from '../Routes'
 import './ChroniclesPage.css'
 
 const ChroniclesPage: FC = () => {
   const [searchValue, setSearchValue] = useState('')
+  const [selectedLocation, setSelectedLocation] = useState('')
   const [loading, setLoading] = useState(false)
   const [chronicles, setChronicles] = useState<ChronicleResource[]>([])
+  const [cartCount, setCartCount] = useState(0)
   const navigate = useNavigate()
 
   // Загрузка летописей при монтировании компонента
   useEffect(() => {
     loadChronicles()
+    loadCartInfo()
   }, [])
 
-  const loadChronicles = (query: string = '') => {
+  // Загрузка информации о корзине
+  const loadCartInfo = () => {
+    getChronicleResearchDraft()
+      .then((data) => {
+        if (data) {
+          setCartCount(data.count)
+        } else {
+          setCartCount(0)
+        }
+      })
+      .catch(() => {
+        setCartCount(0)
+      })
+  }
+
+  const loadChronicles = (query: string = '', location: string = '') => {
     setLoading(true)
-    getChronicles(query)
+    getChronicles(query, location)
       .then((response) => {
         setChronicles(response.chronicleResources)
         setLoading(false)
@@ -35,17 +54,27 @@ const ChroniclesPage: FC = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    loadChronicles(searchValue)
+    loadChronicles(searchValue, selectedLocation)
   }
+
+  // Извлекаем уникальные города из загруженных летописей
+  const uniqueLocations = Array.from(new Set(chronicles.map(c => c.location))).sort()
 
   // Обработчик клика на карточку - переход на страницу детального просмотра
   const handleCardClick = (id: number) => {
     navigate(`/chronicle/${id}`)
   }
 
+  // Обработчик клика на корзину
+  const handleCartClick = () => {
+    console.log('Cart clicked - sending GET request to /api/ChronicleRequestList/chronicle_draft')
+    loadCartInfo() // Перезагружаем информацию о корзине
+  }
+
   return (
     <>
       <Header />
+      <ResearchCartButton count={cartCount} onClick={handleCartClick} />
       <div className={`chronicles-container ${loading ? 'loading' : ''}`}>
         {loading && (
           <div className="loading-overlay">
@@ -69,6 +98,18 @@ const ChroniclesPage: FC = () => {
               onChange={(e) => setSearchValue(e.target.value)}
               className="search-input"
             />
+            <Form.Select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="location-filter"
+            >
+              <option value="">Все города</option>
+              {uniqueLocations.map((location, index) => (
+                <option key={index} value={location}>
+                  {location}
+                </option>
+              ))}
+            </Form.Select>
             <Button 
               type="submit" 
               className="search-button"

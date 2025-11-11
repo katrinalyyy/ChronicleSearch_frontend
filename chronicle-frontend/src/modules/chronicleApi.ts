@@ -58,9 +58,14 @@ const mockChronicles: ChronicleResource[] = [
 ]
 
 // Функция для получения списка летописей с фильтрацией
-export const getChronicles = async (searchQuery: string = ''): Promise<ChronicleListResponse> => {
-  const url = searchQuery 
-    ? `/api/chronicle_resources?chronicle=${encodeURIComponent(searchQuery)}`
+export const getChronicles = async (searchQuery: string = '', location: string = ''): Promise<ChronicleListResponse> => {
+  // Формируем параметры запроса
+  const params = new URLSearchParams()
+  if (searchQuery) params.append('title', searchQuery)
+  if (location) params.append('location', location)
+  
+  const url = params.toString() 
+    ? `/api/chronicle_resources?${params.toString()}`
     : '/api/chronicle_resources'
   
   return fetch(url)
@@ -78,13 +83,21 @@ export const getChronicles = async (searchQuery: string = ''): Promise<Chronicle
       }
     })
     .catch(() => {
-      // В случае ошибки используем mock-данные, фильтруем по названию
+      // В случае ошибки используем mock-данные, фильтруем по названию и городу
       console.warn('Using mock data: backend not available')
-      const filteredChronicles = searchQuery
-        ? mockChronicles.filter((chronicle) => 
-            chronicle.title.toLowerCase().startsWith(searchQuery.toLowerCase())
-          )
-        : mockChronicles
+      let filteredChronicles = mockChronicles
+      
+      if (searchQuery) {
+        filteredChronicles = filteredChronicles.filter((chronicle) => 
+          chronicle.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      }
+      
+      if (location) {
+        filteredChronicles = filteredChronicles.filter((chronicle) => 
+          chronicle.location.toLowerCase().includes(location.toLowerCase())
+        )
+      }
       
       return {
         chronicleResources: filteredChronicles,
@@ -110,6 +123,43 @@ export const getChronicleById = async (id: number): Promise<ChronicleResource | 
       // В случае ошибки используем mock-данные, фильтруем по ID
       console.warn('Using mock data: backend not available')
       return mockChronicles.find((chronicle) => chronicle.id === id) || null
+    })
+}
+
+// Интерфейс для ответа о черновике корзины
+export interface DraftRequestInfo {
+  request_id: number
+  count: number
+}
+
+// Функция для получения информации о черновике корзины (заявки)
+export const getChronicleResearchDraft = async (): Promise<DraftRequestInfo | null> => {
+  return fetch('/api/ChronicleRequestList/chronicle_draft')
+    .then((response) => {
+      // Если 401 или 403 (не авторизован) - это нормально для гостя
+      if (response.status === 401 || response.status === 403) {
+        console.log('Guest mode: no research cart available (status:', response.status, ')')
+        return null
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch draft info')
+      }
+      
+      return response.json()
+    })
+    .then((data) => {
+      if (!data || data.status !== 'success') return null
+      
+      return {
+        request_id: data.request_id,
+        count: data.count,
+      }
+    })
+    .catch((error) => {
+      // В случае ошибки возвращаем null (корзина будет неактивна)
+      console.warn('Research cart unavailable:', error.message)
+      return null
     })
 }
 

@@ -68,6 +68,27 @@
   color: #594949;
 }
 
+.location-filter {
+  width: 250px;
+  height: 56px;
+  padding: 0 1.2rem;
+  border: none;
+  border-radius: 30px;
+  font-size: 25px;
+  background-color: #ACA4A4;
+  color: #594949;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.location-filter:focus {
+  outline: none;
+  box-shadow: none;
+  background-color: #ACA4A4;
+  color: #594949;
+}
+
 .search-button {
   background-color: #850000;
   color: #FFFFFF;
@@ -108,13 +129,24 @@
     font-size: 35px;
   }
   
+  .search-form {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
   .search-input {
     font-size: 18px;
+    width: 100%;
+  }
+  
+  .location-filter {
+    font-size: 18px;
+    width: 100%;
   }
   
   .search-button {
     font-size: 18px;
-    width: 100px;
+    width: 100%;
   }
 }
 
