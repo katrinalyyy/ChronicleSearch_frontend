@@ -35,3 +35,34 @@
   color: #850000 !important;
 }
 
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .custom-header {
+    height: auto;
+    min-height: 70px;
+  }
+
+  .logo-container {
+    margin-left: 12px;
+  }
+
+  .logo-text {
+    font-size: 12px;
+  }
+
+  .nav-link-custom {
+    font-size: 14px;
+    margin: 8px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-text {
+    font-size: 10px;
+  }
+
+  .nav-link-custom {
+    font-size: 13px;
+  }
+}
+

@@ -64,3 +64,52 @@
   color: #FFFFFF;
 }
 
+/* Адаптивность для планшетов */
+@media (max-width: 768px) {
+  .home-title {
+    font-size: 35px;
+  }
+
+  .home-description {
+    padding: 30px;
+    border-radius: 30px;
+  }
+
+  .description-text {
+    font-size: 18px;
+  }
+
+  .btn-primary-custom {
+    font-size: 18px;
+    padding: 12px 30px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 480px) {
+  .home-title {
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+
+  .home-description {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .description-text {
+    font-size: 16px;
+  }
+
+  .home-buttons {
+    flex-direction: column;
+    margin-top: 30px;
+  }
+
+  .btn-primary-custom {
+    font-size: 16px;
+    padding: 12px 24px;
+    width: 100%;
+  }
+}
+

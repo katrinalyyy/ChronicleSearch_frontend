@@ -26,7 +26,7 @@ const mockChronicles: ChronicleResource[] = [
     date_of_creation: '1110-1118 гг.',
     time_of_action: 'IX-XII века',
     location: 'Киев',
-    image: '', // Пустая строка - будет использоваться дефолтное изображение
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Radzivil_Chronicle_manuscript.jpg/400px-Radzivil_Chronicle_manuscript.jpg',
     detailed_description: 'Древнейшая из дошедших до нас древнерусских летописей',
     detailed_significance: 'Важнейший источник по истории Древней Руси',
     detailed_editions: 'Лаврентьевская, Ипатьевская',
@@ -38,7 +38,7 @@ const mockChronicles: ChronicleResource[] = [
     date_of_creation: 'XIII-XIV века',
     time_of_action: 'XI-XIV века',
     location: 'Новгород',
-    image: '', // Пустая строка - будет использоваться дефолтное изображение
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Novgorodcodex.jpg/400px-Novgorodcodex.jpg',
     detailed_description: 'Старейшая из новгородских летописей',
     detailed_significance: 'Важный источник по истории Новгородской республики',
     detailed_editions: 'Старший и Младший изводы',
@@ -50,7 +50,7 @@ const mockChronicles: ChronicleResource[] = [
     date_of_creation: 'XV век',
     time_of_action: 'IX-XIII века',
     location: 'Киев, Галич',
-    image: '', // Пустая строка - будет использоваться дефолтное изображение
+    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Chronicle_of_Ipatiev.jpg/400px-Chronicle_of_Ipatiev.jpg',
     detailed_description: 'Летописный свод, содержащий Повесть временных лет и Галицко-Волынскую летопись',
     detailed_significance: 'Основной источник по истории Юго-Западной Руси',
     detailed_editions: 'Единственный список',

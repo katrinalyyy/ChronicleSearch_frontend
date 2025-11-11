@@ -22,7 +22,9 @@ const router = createBrowserRouter([
     path: '/chronicle/:id',
     element: <ChronicleDetailPage />,
   },
-])
+], {
+  basename: '/ChronicleSearch_frontend'
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

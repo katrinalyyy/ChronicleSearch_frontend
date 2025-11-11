@@ -118,6 +118,81 @@
   margin-bottom: 60px;
 }
 
+/* При ширине > 1200px показываем 3 колонки */
+@media (min-width: 1200px) {
+  .chronicles-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* При ширине 992px - 1199px показываем 2 колонки */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .chronicles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* При ширине 768px - 991px показываем 2 колонки */
+@media (min-width: 768px) and (max-width: 991px) {
+  /* Убираем ограничение Bootstrap Container */
+  .chronicles-container .container {
+    max-width: 100% !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  
+  .chronicles-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    row-gap: 40px !important;
+    column-gap: 10px !important;
+    justify-items: center;
+    padding: 0;
+    margin: 0 !important;
+  }
+  
+  /* Убираем Bootstrap Col - делаем элемент обычным div */
+  .chronicles-grid > * {
+    display: contents;
+  }
+  
+  .chronicles-container {
+    padding: 0 10px;
+  }
+  
+  .search-form {
+    flex-direction: row;
+    gap: 20px;
+    padding: 20px 10px;
+  }
+  
+  .search-input {
+    width: 400px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .location-filter {
+    width: 200px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .search-button {
+    width: 110px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+
+/* При ширине < 768px показываем 1 колонку */
+@media (max-width: 767px) {
+  .chronicles-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
 .no-results {
   text-align: center;
   padding: 60px 20px;

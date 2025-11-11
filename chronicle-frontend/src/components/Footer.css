@@ -32,3 +32,40 @@
   line-height: 0.8;
 }
 
+/* Адаптивность для планшетов */
+@media (max-width: 768px) {
+  .site-footer {
+    padding: 30px 15px;
+  }
+
+  .footer-text {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .first-letter {
+    font-size: 80px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 480px) {
+  .site-footer {
+    padding: 20px 10px;
+  }
+
+  .footer-text {
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  .first-letter {
+    font-size: 60px;
+  }
+
+  .footer-text-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
