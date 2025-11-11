@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/ChronicleSearch_frontend/sw.js', { scope: '/ChronicleSearch_frontend/' })})}
