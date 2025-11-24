@@ -1,16 +1,21 @@
 import { type FC } from 'react'
 import { Card } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-import { type ChronicleResource } from '../modules/chronicleApi'
+import { type Lab1IntermalAppDsChronicleResource } from '../api/Api'
 import { defaultImage } from '../constants/defaultImage'
 import './ChronicleCard.css'
 
 interface Props {
-  chronicle: ChronicleResource
+  chronicle: Lab1IntermalAppDsChronicleResource
   imageClickHandler?: () => void
 }
 
 const ChronicleCard: FC<Props> = ({ chronicle, imageClickHandler }) => {
+  // Проверяем что id существует
+  if (!chronicle.id) {
+    return null
+  }
+
   return (
     <Card className="chronicle-card">
       <Card.Img 
@@ -25,20 +30,20 @@ const ChronicleCard: FC<Props> = ({ chronicle, imageClickHandler }) => {
       />
       <Card.Body className="chronicle-card-body">
         <Card.Title className="chronicle-card-title">
-          {chronicle.title}
+          {chronicle.title || 'Без названия'}
         </Card.Title>
         <div className="chronicle-card-info">
           <div className="info-item">
-            <strong>Автор(ы):</strong> {chronicle.author}
+            <strong>Автор(ы):</strong> {chronicle.author || 'Неизвестен'}
           </div>
           <div className="info-item">
-            <strong>Дата создания:</strong> {chronicle.date_of_creation}
+            <strong>Дата создания:</strong> {chronicle.date_of_creation || 'Не указана'}
           </div>
           <div className="info-item">
-            <strong>Время действия:</strong> {chronicle.time_of_action}
+            <strong>Время действия:</strong> {chronicle.time_of_action || 'Не указано'}
           </div>
           <div className="info-item">
-            <strong>Место:</strong> {chronicle.location}
+            <strong>Место:</strong> {chronicle.location || 'Не указано'}
           </div>
         </div>
         <div className="chronicle-card-actions">

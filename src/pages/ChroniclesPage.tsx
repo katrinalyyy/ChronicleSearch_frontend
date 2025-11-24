@@ -6,28 +6,27 @@ import Footer from '../components/Footer'
 import ChronicleCard from '../components/ChronicleCard'
 import Breadcrumbs from '../components/Breadcrumbs'
 import ResearchCartButton from '../components/ResearchCartButton'
-import { getChronicles, getChronicleResearchDraft, type ChronicleResource } from '../modules/chronicleApi'
+import { getChronicleResearchDraft } from '../modules/chronicleApi'
 import { ROUTE_LABELS } from '../Routes'
 import { useAppSelector, useAppDispatch } from '../store/hooks'
-import { setSearchQuery, setSelectedLocation } from '../store/filtersSlice'
+import { setSearchValue, setSelectedLocation, getChroniclesList } from '../store/chroniclesSlice'
 import './ChroniclesPage.css'
 
 const ChroniclesPage: FC = () => {
-  // Redux state для фильтров
-  const searchValue = useAppSelector((state) => state.filters.searchQuery)
-  const selectedLocation = useAppSelector((state) => state.filters.selectedLocation)
+  // Redux state для хроник
+  const searchValue = useAppSelector((state) => state.chronicles.searchValue)
+  const selectedLocation = useAppSelector((state) => state.chronicles.selectedLocation)
+  const chronicles = useAppSelector((state) => state.chronicles.chronicles)
+  const loading = useAppSelector((state) => state.chronicles.loading)
   const dispatch = useAppDispatch()
   
-  // Локальный state для данных и загрузки
-  const [loading, setLoading] = useState(false)
-  const [chronicles, setChronicles] = useState<ChronicleResource[]>([])
+  // Локальный state для корзины
   const [cartCount, setCartCount] = useState(0)
   const navigate = useNavigate()
 
-  // Загрузка летописей при монтировании компонента (с сохраненными фильтрами)
+  // Загрузка летописей при монтировании компонента
   useEffect(() => {
-    loadChronicles(searchValue, selectedLocation)
-    // Корзину загружаем только при клике, не при загрузке страницы
+    dispatch(getChroniclesList())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -42,26 +41,15 @@ const ChroniclesPage: FC = () => {
       })
   }
 
-  const loadChronicles = (query: string = '', location: string = '') => {
-    setLoading(true)
-    getChronicles(query, location)
-      .then((response) => {
-        setChronicles(response.chronicleResources)
-        setLoading(false)
-      })
-      .catch(() => {
-        // В случае ошибки mock-данные уже вернутся из API функции
-        setLoading(false)
-      })
-  }
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    loadChronicles(searchValue, selectedLocation)
+    dispatch(getChroniclesList())
   }
 
   // Извлекаем уникальные города из загруженных летописей
-  const uniqueLocations = Array.from(new Set(chronicles.map(c => c.location))).sort()
+  const uniqueLocations = Array.from(
+    new Set(chronicles.map(c => c.location).filter((loc): loc is string => !!loc))
+  ).sort()
 
   // Обработчик клика на карточку - переход на страницу детального просмотра
   const handleCardClick = (id: number) => {
@@ -98,7 +86,7 @@ const ChroniclesPage: FC = () => {
               type="text"
               placeholder="Поиск по названию..."
               value={searchValue}
-              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+              onChange={(e) => dispatch(setSearchValue(e.target.value))}
               className="search-input"
             />
             <Form.Select
@@ -129,10 +117,10 @@ const ChroniclesPage: FC = () => {
           ) : (
             <Row className="chronicles-grid">
               {chronicles.map((chronicle, index) => (
-                <Col key={index} xs={12} md={6} lg={4}>
+                <Col key={chronicle.id || index} xs={12} md={6} lg={4}>
                   <ChronicleCard 
                     chronicle={chronicle}
-                    imageClickHandler={() => handleCardClick(chronicle.id)}
+                    imageClickHandler={() => chronicle.id && handleCardClick(chronicle.id)}
                   />
                 </Col>
               ))}
