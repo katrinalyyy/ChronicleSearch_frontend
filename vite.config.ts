@@ -47,11 +47,11 @@ export default defineConfig(({ command }) => ({
       }
     })
   ],
-  // Для Tauri используем '/', для GitHub Pages - '/ChronicleSearch_frontend/'
+  // Для GitHub Pages используем базовый путь репозитория
   base: command === 'build' && process.env.GITHUB_PAGES ? '/ChronicleSearch_frontend/' : '/',
   server: {
-    // HTTPS только если не Tauri (для PWA и браузера)
-    https: process.env.TAURI_ENV_PLATFORM ? undefined : {
+    // HTTPS для PWA
+    https: {
       key: fs.readFileSync(path.resolve(__dirname, 'certs/localhost+3-key.pem')),
       cert: fs.readFileSync(path.resolve(__dirname, 'certs/localhost+3.pem')),
     },

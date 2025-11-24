@@ -1,12 +1,5 @@
-declare global {
-  interface Window {
-    __TAURI_INTERNALS__?: unknown
-  }
-}
-
-const API_BASE_URL = window.__TAURI_INTERNALS__ 
-  ? 'http://192.168.200.17:8080' 
-  : ''
+// PWA версия - использует proxy из vite.config.ts
+const API_BASE_URL = ''
 
 // Интерфейсы для данных летописей
 export interface ChronicleResource {
@@ -84,11 +77,8 @@ export const getChronicles = async (searchQuery: string = '', location: string =
       const resources = (data.data || []).map((item: ChronicleResource) => {
         let imageUrl = item.image || ''
         
-        if (window.__TAURI_INTERNALS__ && imageUrl) {
-          imageUrl = imageUrl.replace('http://127.0.0.1:9000', 'http://192.168.200.17:9000')
-        } else {
-          imageUrl = imageUrl.replace('http://127.0.0.1:9000', '')
-        }
+        // Убираем хост для работы через proxy
+        imageUrl = imageUrl.replace('http://127.0.0.1:9000', '')
         
         return {
           ...item,
@@ -135,13 +125,8 @@ export const getChronicleById = async (id: number): Promise<ChronicleResource | 
       // Преобразуем URL изображения
       let imageUrl = data.data.image || ''
       
-      // В Tauri заменяем localhost на IP адрес
-      if (window.__TAURI_INTERNALS__ && imageUrl) {
-        imageUrl = imageUrl.replace('http://127.0.0.1:9000', 'http://192.168.200.17:9000')
-      } else {
-        // В dev режиме убираем хост для работы через proxy
-        imageUrl = imageUrl.replace('http://127.0.0.1:9000', '')
-      }
+      // Убираем хост для работы через proxy
+      imageUrl = imageUrl.replace('http://127.0.0.1:9000', '')
       
       return {
         ...data.data,
