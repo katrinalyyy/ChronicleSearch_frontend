@@ -43,6 +43,16 @@ func (h *Handler) GetChronicleResourcesAPI(ctx *gin.Context) {
 	})
 }
 
+// GetChronicleResourceAPI godoc
+// @Summary Получить хронику по ID
+// @Description Получить детальную информацию о хронике по идентификатору
+// @Tags chronicle_resources
+// @Accept json
+// @Produce json
+// @Param id_chronicle_resource path int true "ID хроники"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 404 {object} map[string]interface{} "error"
+// @Router /api/chronicle_resources/{id_chronicle_resource} [get]
 func (h *Handler) GetChronicleResourceAPI(ctx *gin.Context) {
 	idStr := ctx.Param("id_chronicle_resource")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -100,6 +110,20 @@ func (h *Handler) CreateChronicleResourceAPI(ctx *gin.Context) {
 	})
 }
 
+// UpdateChronicleResourceAPI godoc
+// @Summary Обновить хронику
+// @Description Обновление существующей хроники (требуется авторизация)
+// @Tags chronicle_resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id_chronicle_resource path int true "ID хроники"
+// @Param chronicle body ds.ChronicleResource true "Обновленные данные хроники"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "error"
+// @Failure 401 {object} map[string]interface{} "error"
+// @Failure 404 {object} map[string]interface{} "error"
+// @Router /api/chronicle_resources/{id_chronicle_resource} [put]
 func (h *Handler) UpdateChronicleResourceAPI(ctx *gin.Context) {
 	idStr := ctx.Param("id_chronicle_resource")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -130,6 +154,19 @@ func (h *Handler) UpdateChronicleResourceAPI(ctx *gin.Context) {
 	})
 }
 
+// DeleteChronicleResourceAPI godoc
+// @Summary Удалить хронику
+// @Description Удаление хроники по ID (требуется авторизация)
+// @Tags chronicle_resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id_chronicle_resource path int true "ID хроники"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "error"
+// @Failure 401 {object} map[string]interface{} "error"
+// @Failure 404 {object} map[string]interface{} "error"
+// @Router /api/chronicle_resources/{id_chronicle_resource} [delete]
 func (h *Handler) DeleteChronicleResourceAPI(ctx *gin.Context) {
 	idStr := ctx.Param("id_chronicle_resource")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -154,6 +191,20 @@ func (h *Handler) DeleteChronicleResourceAPI(ctx *gin.Context) {
 	})
 }
 
+// UploadChronicleResourceImageAPI godoc
+// @Summary Загрузить изображение хроники
+// @Description Загрузка изображения для хроники (требуется авторизация)
+// @Tags chronicle_resources
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param id_chronicle_resource path int true "ID хроники"
+// @Param image formData file true "Изображение"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "error"
+// @Failure 401 {object} map[string]interface{} "error"
+// @Failure 404 {object} map[string]interface{} "error"
+// @Router /api/chronicle_resources/{id_chronicle_resource}/image [post]
 func (h *Handler) UploadChronicleResourceImageAPI(ctx *gin.Context) {
 	idStr := ctx.Param("id_chronicle_resource")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -213,6 +264,19 @@ func (h *Handler) UploadChronicleResourceImageAPI(ctx *gin.Context) {
 	})
 }
 
+// AddChronicleToRequestAPI godoc
+// @Summary Добавить хронику в заявку
+// @Description Добавление хроники в черновик заявки (требуется авторизация)
+// @Tags chronicle_resources
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id_chronicle_resource path int true "ID хроники"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "error"
+// @Failure 401 {object} map[string]interface{} "error"
+// @Failure 404 {object} map[string]interface{} "error"
+// @Router /api/chronicle_resources/{id_chronicle_resource}/add_to_chronicle_request [post]
 func (h *Handler) AddChronicleToRequestAPI(ctx *gin.Context) {
 	idStr := ctx.Param("id_chronicle_resource")
 	chronicleID, err := strconv.ParseUint(idStr, 10, 32)
@@ -227,7 +291,7 @@ func (h *Handler) AddChronicleToRequestAPI(ctx *gin.Context) {
 		h.errorHandler(ctx, http.StatusUnauthorized, fmt.Errorf("user UUID not found in context"))
 		return
 	}
-	
+
 	userUUID, err := uuid.Parse(userUUIDStr)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, fmt.Errorf("invalid user UUID"))

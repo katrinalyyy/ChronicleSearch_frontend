@@ -78,6 +78,212 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/ChronicleRequestList/chronicle_draft": {
+            "get": {
+                "description": "Получить ID черновика заявки и количество хроник в нем (для неавторизованных возвращает пустую корзину)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ChronicleRequestList"
+                ],
+                "summary": "Получить информацию о черновике заявки",
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/ChronicleRequestList/{id_chronicle_request}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получить детальную информацию о заявке со списком хроник (требуется авторизация)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ChronicleRequestList"
+                ],
+                "summary": "Получить заявку с хрониками",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id_chronicle_request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновление полей заявки (требуется авторизация)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ChronicleRequestList"
+                ],
+                "summary": "Обновить заявку",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id_chronicle_request",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Обновленные данные заявки",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Lab1_intermal_app_ds.RequestChronicleResearch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаление заявки (требуется авторизация, только создатель)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ChronicleRequestList"
+                ],
+                "summary": "Удалить заявку",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id_chronicle_request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/ChronicleRequestList/{id_chronicle_request}/chronicle_complete-or-reject": {
             "put": {
                 "security": [
@@ -136,6 +342,197 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "error - не модератор",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/ChronicleRequestList/{id_chronicle_request}/chronicle_request-form": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Формирование заявки из черновика (требуется авторизация, только создатель)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ChronicleRequestList"
+                ],
+                "summary": "Сформировать заявку",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id_chronicle_request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/chronicle_research/{id}/chronicles/{chronicle_id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновление количества, порядка или других полей связи хроники с заявкой (требуется авторизация)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chronicle_research"
+                ],
+                "summary": "Обновить хронику в заявке",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID хроники",
+                        "name": "chronicle_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Обновляемые поля (quantity, order, etc.)",
+                        "name": "updates",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаление хроники из заявки (требуется авторизация)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chronicle_research"
+                ],
+                "summary": "Удалить хронику из заявки",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID хроники",
+                        "name": "chronicle_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -218,12 +615,396 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ds.ChronicleResource"
+                            "$ref": "#/definitions/Lab1_intermal_app_ds.ChronicleResource"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/chronicle_resources/{id_chronicle_resource}": {
+            "get": {
+                "description": "Получить детальную информацию о хронике по идентификатору",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chronicle_resources"
+                ],
+                "summary": "Получить хронику по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID хроники",
+                        "name": "id_chronicle_resource",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновление существующей хроники (требуется авторизация)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chronicle_resources"
+                ],
+                "summary": "Обновить хронику",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID хроники",
+                        "name": "id_chronicle_resource",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Обновленные данные хроники",
+                        "name": "chronicle",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Lab1_intermal_app_ds.ChronicleResource"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаление хроники по ID (требуется авторизация)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chronicle_resources"
+                ],
+                "summary": "Удалить хронику",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID хроники",
+                        "name": "id_chronicle_resource",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/chronicle_resources/{id_chronicle_resource}/add_to_chronicle_request": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Добавление хроники в черновик заявки (требуется авторизация)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chronicle_resources"
+                ],
+                "summary": "Добавить хронику в заявку",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID хроники",
+                        "name": "id_chronicle_resource",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/chronicle_resources/{id_chronicle_resource}/image": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Загрузка изображения для хроники (требуется авторизация)",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chronicle_resources"
+                ],
+                "summary": "Загрузить изображение хроники",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID хроники",
+                        "name": "id_chronicle_resource",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Изображение",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/user/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получение данных профиля текущего авторизованного пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Получить профиль пользователя",
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновление данных профиля текущего авторизованного пользователя (имя, пароль)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Обновить профиль пользователя",
+                "parameters": [
+                    {
+                        "description": "Обновленные данные профиля",
+                        "name": "profile",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
                         "description": "success",
                         "schema": {
                             "type": "object",
@@ -267,7 +1048,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.loginReq"
+                            "$ref": "#/definitions/intermal_app_handler.loginReq"
                         }
                     }
                 ],
@@ -275,7 +1056,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.loginResp"
+                            "$ref": "#/definitions/intermal_app_handler.loginResp"
                         }
                     },
                     "400": {
@@ -344,7 +1125,7 @@ const docTemplate = `{
         },
         "/sign_up": {
             "post": {
-                "description": "Создание нового пользователя с ролью Buyer",
+                "description": "Создание нового пользователя с ролью Исследователь",
                 "consumes": [
                     "application/json"
                 ],
@@ -362,7 +1143,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.registerReq"
+                            "$ref": "#/definitions/intermal_app_handler.registerReq"
                         }
                     }
                 ],
@@ -370,7 +1151,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handler.registerResp"
+                            "$ref": "#/definitions/intermal_app_handler.registerResp"
                         }
                     },
                     "400": {
@@ -396,7 +1177,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "ds.ChronicleResource": {
+        "Lab1_intermal_app_ds.ChronicleResource": {
             "type": "object",
             "properties": {
                 "author": {
@@ -431,7 +1212,92 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.loginReq": {
+        "Lab1_intermal_app_ds.RequestChronicleResearch": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "$ref": "#/definitions/sql.NullTime"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "creator": {
+                    "$ref": "#/definitions/Lab1_intermal_app_ds.User"
+                },
+                "formed_at": {
+                    "$ref": "#/definitions/sql.NullTime"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "moderator": {
+                    "$ref": "#/definitions/Lab1_intermal_app_ds.User"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "search_event": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/Lab1_intermal_app_ds.RequestStatus"
+                }
+            }
+        },
+        "Lab1_intermal_app_ds.RequestStatus": {
+            "type": "string",
+            "enum": [
+                "черновик",
+                "удалён",
+                "сформирован",
+                "завершён",
+                "отклонён"
+            ],
+            "x-enum-varnames": [
+                "RequestStatusDraft",
+                "RequestStatusDeleted",
+                "RequestStatusFormed",
+                "RequestStatusCompleted",
+                "RequestStatusRejected"
+            ]
+        },
+        "Lab1_intermal_app_ds.User": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "pass": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/Lab1_intermal_app_role.Role"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "Lab1_intermal_app_role.Role": {
+            "type": "integer",
+            "enum": [
+                0,
+                1
+            ],
+            "x-enum-comments": {
+                "Moderator": "1 - Модератор (администратор)",
+                "Researcher": "0 - Исследователь (обычный пользователь)"
+            },
+            "x-enum-descriptions": [
+                "0 - Исследователь (обычный пользователь)",
+                "1 - Модератор (администратор)"
+            ],
+            "x-enum-varnames": [
+                "Researcher",
+                "Moderator"
+            ]
+        },
+        "intermal_app_handler.loginReq": {
             "type": "object",
             "properties": {
                 "login": {
@@ -444,7 +1310,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.loginResp": {
+        "intermal_app_handler.loginResp": {
             "type": "object",
             "properties": {
                 "access_token": {
@@ -461,7 +1327,7 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.registerReq": {
+        "intermal_app_handler.registerReq": {
             "type": "object",
             "properties": {
                 "name": {
@@ -474,12 +1340,24 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.registerResp": {
+        "intermal_app_handler.registerResp": {
             "type": "object",
             "properties": {
                 "ok": {
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "sql.NullTime": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
                 }
             }
         }

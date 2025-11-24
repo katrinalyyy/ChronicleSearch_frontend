@@ -15,6 +15,14 @@ import (
 	"github.com/google/uuid"
 )
 
+// GetDraftRequestInfoAPI godoc
+// @Summary Получить информацию о черновике заявки
+// @Description Получить ID черновика заявки и количество хроник в нем (для неавторизованных возвращает пустую корзину)
+// @Tags ChronicleRequestList
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "success"
+// @Router /api/ChronicleRequestList/chronicle_draft [get]
 func (h *Handler) GetDraftRequestInfoAPI(ctx *gin.Context) {
 	// Получаем UUID пользователя из контекста
 	userUUIDStr, exists := middleware.GetUserUUID(ctx)
@@ -126,6 +134,19 @@ func (h *Handler) GetRequestChronicleResearchAPI(ctx *gin.Context) {
 	})
 }
 
+// GetRequestWithChroniclesAPI godoc
+// @Summary Получить заявку с хрониками
+// @Description Получить детальную информацию о заявке со списком хроник (требуется авторизация)
+// @Tags ChronicleRequestList
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id_chronicle_request path int true "ID заявки"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "error"
+// @Failure 401 {object} map[string]interface{} "error"
+// @Failure 404 {object} map[string]interface{} "error"
+// @Router /api/ChronicleRequestList/{id_chronicle_request} [get]
 func (h *Handler) GetRequestWithChroniclesAPI(ctx *gin.Context) {
 	idStr := ctx.Param("id_chronicle_request")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -158,6 +179,20 @@ func (h *Handler) GetRequestWithChroniclesAPI(ctx *gin.Context) {
 	})
 }
 
+// UpdateRequestChronicleResearchAPI godoc
+// @Summary Обновить заявку
+// @Description Обновление полей заявки (требуется авторизация)
+// @Tags ChronicleRequestList
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id_chronicle_request path int true "ID заявки"
+// @Param request body ds.RequestChronicleResearch true "Обновленные данные заявки"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "error"
+// @Failure 401 {object} map[string]interface{} "error"
+// @Failure 404 {object} map[string]interface{} "error"
+// @Router /api/ChronicleRequestList/{id_chronicle_request} [put]
 func (h *Handler) UpdateRequestChronicleResearchAPI(ctx *gin.Context) {
 	idStr := ctx.Param("id_chronicle_request")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -188,6 +223,19 @@ func (h *Handler) UpdateRequestChronicleResearchAPI(ctx *gin.Context) {
 	})
 }
 
+// FormRequestChronicleResearchAPI godoc
+// @Summary Сформировать заявку
+// @Description Формирование заявки из черновика (требуется авторизация, только создатель)
+// @Tags ChronicleRequestList
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id_chronicle_request path int true "ID заявки"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "error"
+// @Failure 401 {object} map[string]interface{} "error"
+// @Failure 404 {object} map[string]interface{} "error"
+// @Router /api/ChronicleRequestList/{id_chronicle_request}/chronicle_request-form [put]
 func (h *Handler) FormRequestChronicleResearchAPI(ctx *gin.Context) {
 	idStr := ctx.Param("id_chronicle_request")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -304,6 +352,19 @@ func (h *Handler) CompleteOrRejectRequestChronicleResearchAPI(ctx *gin.Context) 
 	}
 }
 
+// DeleteRequestChronicleResearchAPI godoc
+// @Summary Удалить заявку
+// @Description Удаление заявки (требуется авторизация, только создатель)
+// @Tags ChronicleRequestList
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id_chronicle_request path int true "ID заявки"
+// @Success 200 {object} map[string]interface{} "success"
+// @Failure 400 {object} map[string]interface{} "error"
+// @Failure 401 {object} map[string]interface{} "error"
+// @Failure 404 {object} map[string]interface{} "error"
+// @Router /api/ChronicleRequestList/{id_chronicle_request} [delete]
 func (h *Handler) DeleteRequestChronicleResearchAPI(ctx *gin.Context) {
 	idStr := ctx.Param("id_chronicle_request")
 	id, err := strconv.ParseUint(idStr, 10, 32)

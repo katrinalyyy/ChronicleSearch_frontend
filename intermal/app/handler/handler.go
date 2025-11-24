@@ -76,6 +76,13 @@ func (h *Handler) RegisterAPI(router *gin.Engine) {
 			chronicleResearch.PUT("/:id/chronicles/:chronicle_id", h.App.WithAuthCheck(role.Researcher, role.Moderator), h.UpdateChronicleResearchInRequestAPI)
 			chronicleResearch.DELETE("/:id/chronicles/:chronicle_id", h.App.WithAuthCheck(role.Researcher, role.Moderator), h.DeleteChronicleResearchFromRequestAPI)
 		}
+
+		// User profile - требуют авторизации
+		user := api.Group("/user")
+		{
+			user.GET("/profile", h.App.WithAuthCheck(role.Researcher, role.Moderator), h.GetUserProfileAPI)
+			user.PUT("/profile", h.App.WithAuthCheck(role.Researcher, role.Moderator), h.UpdateUserProfileAPI)
+		}
 	}
 }
 

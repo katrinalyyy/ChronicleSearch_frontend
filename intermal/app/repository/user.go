@@ -24,3 +24,18 @@ func (r *Repository) GetUserByLogin(login string) (*ds.User, error) {
 
 	return user, nil
 }
+
+func (r *Repository) GetUserByUUID(userUUID uuid.UUID) (*ds.User, error) {
+	user := &ds.User{}
+
+	err := r.db.Where("uuid = ?", userUUID).First(user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (r *Repository) UpdateUser(user *ds.User) error {
+	return r.db.Model(user).Updates(user).Error
+}

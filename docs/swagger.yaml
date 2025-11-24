@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  ds.ChronicleResource:
+  Lab1_intermal_app_ds.ChronicleResource:
     properties:
       author:
         type: string
@@ -23,7 +23,67 @@ definitions:
       title:
         type: string
     type: object
-  handler.loginReq:
+  Lab1_intermal_app_ds.RequestChronicleResearch:
+    properties:
+      completed_at:
+        $ref: '#/definitions/sql.NullTime'
+      created_at:
+        type: string
+      creator:
+        $ref: '#/definitions/Lab1_intermal_app_ds.User'
+      formed_at:
+        $ref: '#/definitions/sql.NullTime'
+      id:
+        type: integer
+      moderator:
+        $ref: '#/definitions/Lab1_intermal_app_ds.User'
+      name:
+        type: string
+      search_event:
+        type: string
+      status:
+        $ref: '#/definitions/Lab1_intermal_app_ds.RequestStatus'
+    type: object
+  Lab1_intermal_app_ds.RequestStatus:
+    enum:
+    - черновик
+    - удалён
+    - сформирован
+    - завершён
+    - отклонён
+    type: string
+    x-enum-varnames:
+    - RequestStatusDraft
+    - RequestStatusDeleted
+    - RequestStatusFormed
+    - RequestStatusCompleted
+    - RequestStatusRejected
+  Lab1_intermal_app_ds.User:
+    properties:
+      name:
+        type: string
+      pass:
+        type: string
+      role:
+        $ref: '#/definitions/Lab1_intermal_app_role.Role'
+      uuid:
+        type: string
+    type: object
+  Lab1_intermal_app_role.Role:
+    enum:
+    - 0
+    - 1
+    type: integer
+    x-enum-comments:
+      Moderator: 1 - Модератор (администратор)
+      Researcher: 0 - Исследователь (обычный пользователь)
+    x-enum-descriptions:
+    - 0 - Исследователь (обычный пользователь)
+    - 1 - Модератор (администратор)
+    x-enum-varnames:
+    - Researcher
+    - Moderator
+  intermal_app_handler.loginReq:
     properties:
       login:
         example: max
@@ -32,7 +92,7 @@ definitions:
         example: "123"
         type: string
     type: object
-  handler.loginResp:
+  intermal_app_handler.loginResp:
     properties:
       access_token:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -44,7 +104,7 @@ definitions:
         example: Bearer
         type: string
     type: object
-  handler.registerReq:
+  intermal_app_handler.registerReq:
     properties:
       name:
         example: testuser
@@ -53,10 +113,18 @@ definitions:
         example: password123
         type: string
     type: object
-  handler.registerResp:
+  intermal_app_handler.registerResp:
     properties:
       ok:
         example: true
+        type: boolean
+    type: object
+  sql.NullTime:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
         type: boolean
     type: object
 host: localhost:8080
@@ -108,6 +176,128 @@ paths:
       summary: Получить список заявок
       tags:
       - ChronicleRequestList
+  /api/ChronicleRequestList/{id_chronicle_request}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление заявки (требуется авторизация, только создатель)
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id_chronicle_request
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить заявку
+      tags:
+      - ChronicleRequestList
+    get:
+      consumes:
+      - application/json
+      description: Получить детальную информацию о заявке со списком хроник (требуется
+        авторизация)
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id_chronicle_request
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить заявку с хрониками
+      tags:
+      - ChronicleRequestList
+    put:
+      consumes:
+      - application/json
+      description: Обновление полей заявки (требуется авторизация)
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id_chronicle_request
+        required: true
+        type: integer
+      - description: Обновленные данные заявки
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/Lab1_intermal_app_ds.RequestChronicleResearch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить заявку
+      tags:
+      - ChronicleRequestList
   /api/ChronicleRequestList/{id_chronicle_request}/chronicle_complete-or-reject:
     put:
       consumes:
@@ -151,6 +341,152 @@ paths:
       summary: Завершить или отклонить заявку
       tags:
       - ChronicleRequestList
+  /api/ChronicleRequestList/{id_chronicle_request}/chronicle_request-form:
+    put:
+      consumes:
+      - application/json
+      description: Формирование заявки из черновика (требуется авторизация, только
+        создатель)
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id_chronicle_request
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Сформировать заявку
+      tags:
+      - ChronicleRequestList
+  /api/ChronicleRequestList/chronicle_draft:
+    get:
+      consumes:
+      - application/json
+      description: Получить ID черновика заявки и количество хроник в нем (для неавторизованных
+        возвращает пустую корзину)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить информацию о черновике заявки
+      tags:
+      - ChronicleRequestList
+  /api/chronicle_research/{id}/chronicles/{chronicle_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление хроники из заявки (требуется авторизация)
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID хроники
+        in: path
+        name: chronicle_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить хронику из заявки
+      tags:
+      - chronicle_research
+    put:
+      consumes:
+      - application/json
+      description: Обновление количества, порядка или других полей связи хроники с
+        заявкой (требуется авторизация)
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID хроники
+        in: path
+        name: chronicle_id
+        required: true
+        type: integer
+      - description: Обновляемые поля (quantity, order, etc.)
+        in: body
+        name: updates
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить хронику в заявке
+      tags:
+      - chronicle_research
   /api/chronicle_resources:
     get:
       consumes:
@@ -196,7 +532,7 @@ paths:
         name: chronicle
         required: true
         schema:
-          $ref: '#/definitions/ds.ChronicleResource'
+          $ref: '#/definitions/Lab1_intermal_app_ds.ChronicleResource'
       produces:
       - application/json
       responses:
@@ -220,6 +556,261 @@ paths:
       summary: Создать хронику
       tags:
       - chronicle_resources
+  /api/chronicle_resources/{id_chronicle_resource}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление хроники по ID (требуется авторизация)
+      parameters:
+      - description: ID хроники
+        in: path
+        name: id_chronicle_resource
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить хронику
+      tags:
+      - chronicle_resources
+    get:
+      consumes:
+      - application/json
+      description: Получить детальную информацию о хронике по идентификатору
+      parameters:
+      - description: ID хроники
+        in: path
+        name: id_chronicle_resource
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить хронику по ID
+      tags:
+      - chronicle_resources
+    put:
+      consumes:
+      - application/json
+      description: Обновление существующей хроники (требуется авторизация)
+      parameters:
+      - description: ID хроники
+        in: path
+        name: id_chronicle_resource
+        required: true
+        type: integer
+      - description: Обновленные данные хроники
+        in: body
+        name: chronicle
+        required: true
+        schema:
+          $ref: '#/definitions/Lab1_intermal_app_ds.ChronicleResource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить хронику
+      tags:
+      - chronicle_resources
+  /api/chronicle_resources/{id_chronicle_resource}/add_to_chronicle_request:
+    post:
+      consumes:
+      - application/json
+      description: Добавление хроники в черновик заявки (требуется авторизация)
+      parameters:
+      - description: ID хроники
+        in: path
+        name: id_chronicle_resource
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Добавить хронику в заявку
+      tags:
+      - chronicle_resources
+  /api/chronicle_resources/{id_chronicle_resource}/image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загрузка изображения для хроники (требуется авторизация)
+      parameters:
+      - description: ID хроники
+        in: path
+        name: id_chronicle_resource
+        required: true
+        type: integer
+      - description: Изображение
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Загрузить изображение хроники
+      tags:
+      - chronicle_resources
+  /api/user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Получение данных профиля текущего авторизованного пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить профиль пользователя
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Обновление данных профиля текущего авторизованного пользователя
+        (имя, пароль)
+      parameters:
+      - description: Обновленные данные профиля
+        in: body
+        name: profile
+        required: true
+        schema:
+          properties:
+            name:
+              type: string
+            password:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить профиль пользователя
+      tags:
+      - user
   /login:
     post:
       consumes:
@@ -231,14 +822,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.loginReq'
+          $ref: '#/definitions/intermal_app_handler.loginReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.loginResp'
+            $ref: '#/definitions/intermal_app_handler.loginResp'
         "400":
           description: Bad Request
           schema:
@@ -285,21 +876,21 @@ paths:
     post:
       consumes:
       - application/json
-      description: Создание нового пользователя с ролью Buyer
+      description: Создание нового пользователя с ролью Исследователь
       parameters:
       - description: Данные для регистрации
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.registerReq'
+          $ref: '#/definitions/intermal_app_handler.registerReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handler.registerResp'
+            $ref: '#/definitions/intermal_app_handler.registerResp'
         "400":
           description: Bad Request
           schema:
