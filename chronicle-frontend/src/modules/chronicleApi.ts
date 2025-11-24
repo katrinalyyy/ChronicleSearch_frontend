@@ -1,3 +1,13 @@
+declare global {
+  interface Window {
+    __TAURI_INTERNALS__?: unknown
+  }
+}
+
+const API_BASE_URL = window.__TAURI_INTERNALS__ 
+  ? 'http://192.168.200.17:8080' 
+  : ''
+
 // Интерфейсы для данных летописей
 export interface ChronicleResource {
   id: number
@@ -65,17 +75,26 @@ export const getChronicles = async (searchQuery: string = '', location: string =
   if (location) params.append('location', location)
   
   const url = params.toString() 
-    ? `/api/chronicle_resources?${params.toString()}`
-    : '/api/chronicle_resources'
+    ? `${API_BASE_URL}/api/chronicle_resources?${params.toString()}`
+    : `${API_BASE_URL}/api/chronicle_resources`
   
   return fetch(url)
     .then((response) => response.json())
     .then((data) => {
-      // Преобразуем URL изображений для работы через proxy
-      const resources = (data.data || []).map((item: ChronicleResource) => ({
-        ...item,
-        image: item.image ? item.image.replace('http://127.0.0.1:9000', '') : '',
-      }))
+      const resources = (data.data || []).map((item: ChronicleResource) => {
+        let imageUrl = item.image || ''
+        
+        if (window.__TAURI_INTERNALS__ && imageUrl) {
+          imageUrl = imageUrl.replace('http://127.0.0.1:9000', 'http://192.168.200.17:9000')
+        } else {
+          imageUrl = imageUrl.replace('http://127.0.0.1:9000', '')
+        }
+        
+        return {
+          ...item,
+          image: imageUrl,
+        }
+      })
       
       return {
         chronicleResources: resources,
@@ -108,15 +127,25 @@ export const getChronicles = async (searchQuery: string = '', location: string =
 
 // Функция для получения одной летописи по ID
 export const getChronicleById = async (id: number): Promise<ChronicleResource | null> => {
-  return fetch(`/api/chronicle_resources/${id}`)
+  return fetch(`${API_BASE_URL}/api/chronicle_resources/${id}`)
     .then((response) => response.json())
     .then((data) => {
       if (!data.data) return null
       
-      // Преобразуем URL изображения для работы через proxy
+      // Преобразуем URL изображения
+      let imageUrl = data.data.image || ''
+      
+      // В Tauri заменяем localhost на IP адрес
+      if (window.__TAURI_INTERNALS__ && imageUrl) {
+        imageUrl = imageUrl.replace('http://127.0.0.1:9000', 'http://192.168.200.17:9000')
+      } else {
+        // В dev режиме убираем хост для работы через proxy
+        imageUrl = imageUrl.replace('http://127.0.0.1:9000', '')
+      }
+      
       return {
         ...data.data,
-        image: data.data.image ? data.data.image.replace('http://127.0.0.1:9000', '') : '',
+        image: imageUrl,
       }
     })
     .catch(() => {
@@ -133,33 +162,32 @@ export interface DraftRequestInfo {
 }
 
 // Функция для получения информации о черновике корзины (заявки)
-export const getChronicleResearchDraft = async (): Promise<DraftRequestInfo | null> => {
-  return fetch('/api/ChronicleRequestList/chronicle_draft')
-    .then((response) => {
-      // Если 401 или 403 (не авторизован) - это нормально для гостя
-      if (response.status === 401 || response.status === 403) {
-        console.log('Guest mode: no research cart available (status:', response.status, ')')
-        return null
-      }
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch draft info')
-      }
-      
-      return response.json()
-    })
-    .then((data) => {
-      if (!data || data.status !== 'success') return null
-      
-      return {
-        request_id: data.request_id,
-        count: data.count,
-      }
-    })
-    .catch((error) => {
-      // В случае ошибки возвращаем null (корзина будет неактивна)
-      console.warn('Research cart unavailable:', error.message)
-      return null
-    })
+export const getChronicleResearchDraft = async (): Promise<DraftRequestInfo> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/ChronicleRequestList/chronicle_draft`)
+    
+    // Если запрос неуспешен (любая ошибка 4xx или 5xx) - возвращаем пустую корзину
+    if (!response.ok) {
+      // Просто логируем без ошибки
+      console.log(`Cart request: ${response.status} - returning empty cart`)
+      return { request_id: 0, count: 0 }
+    }
+    
+    const data = await response.json()
+    
+    // Если данных нет или запрос неуспешен, возвращаем пустую корзину
+    if (!data || data.status !== 'success') {
+      return { request_id: 0, count: 0 }
+    }
+    
+    return {
+      request_id: data.request_id,
+      count: data.count,
+    }
+  } catch (error) {
+    // В случае любой ошибки возвращаем пустую корзину (count: 0)
+    console.log('Cart unavailable - returning empty cart')
+    return { request_id: 0, count: 0 }
+  }
 }
 

@@ -57,7 +57,8 @@ func (h *Handler) RegisterAPI(router *gin.Engine) {
 		// Requests - требуют авторизации
 		requests := api.Group("/ChronicleRequestList")
 		{
-			requests.GET("/chronicle_draft", h.App.WithAuthCheck(role.Researcher, role.Moderator), h.GetDraftRequestInfoAPI)
+			// GET черновика доступен без авторизации (вернет пустую корзину для гостей)
+			requests.GET("/chronicle_draft", h.GetDraftRequestInfoAPI)
 			requests.GET("", h.App.WithAuthCheck(role.Researcher, role.Moderator), h.GetRequestChronicleResearchAPI)
 			requests.GET("/:id_chronicle_request", h.App.WithAuthCheck(role.Researcher, role.Moderator), h.GetRequestWithChroniclesAPI)
 			requests.PUT("/:id_chronicle_request", h.App.WithAuthCheck(role.Researcher, role.Moderator), h.UpdateRequestChronicleResearchAPI)

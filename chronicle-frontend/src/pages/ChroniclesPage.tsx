@@ -8,31 +8,34 @@ import Breadcrumbs from '../components/Breadcrumbs'
 import ResearchCartButton from '../components/ResearchCartButton'
 import { getChronicles, getChronicleResearchDraft, type ChronicleResource } from '../modules/chronicleApi'
 import { ROUTE_LABELS } from '../Routes'
+import { useAppSelector, useAppDispatch } from '../store/hooks'
+import { setSearchQuery, setSelectedLocation } from '../store/filtersSlice'
 import './ChroniclesPage.css'
 
 const ChroniclesPage: FC = () => {
-  const [searchValue, setSearchValue] = useState('')
-  const [selectedLocation, setSelectedLocation] = useState('')
+  // Redux state для фильтров
+  const searchValue = useAppSelector((state) => state.filters.searchQuery)
+  const selectedLocation = useAppSelector((state) => state.filters.selectedLocation)
+  const dispatch = useAppDispatch()
+  
+  // Локальный state для данных и загрузки
   const [loading, setLoading] = useState(false)
   const [chronicles, setChronicles] = useState<ChronicleResource[]>([])
   const [cartCount, setCartCount] = useState(0)
   const navigate = useNavigate()
 
-  // Загрузка летописей при монтировании компонента
+  // Загрузка летописей при монтировании компонента (с сохраненными фильтрами)
   useEffect(() => {
-    loadChronicles()
-    loadCartInfo()
+    loadChronicles(searchValue, selectedLocation)
+    // Корзину загружаем только при клике, не при загрузке страницы
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Загрузка информации о корзине
   const loadCartInfo = () => {
     getChronicleResearchDraft()
       .then((data) => {
-        if (data) {
-          setCartCount(data.count)
-        } else {
-          setCartCount(0)
-        }
+        setCartCount(data.count)
       })
       .catch(() => {
         setCartCount(0)
@@ -95,12 +98,12 @@ const ChroniclesPage: FC = () => {
               type="text"
               placeholder="Поиск по названию..."
               value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
               className="search-input"
             />
             <Form.Select
               value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
+              onChange={(e) => dispatch(setSelectedLocation(e.target.value))}
               className="location-filter"
             >
               <option value="">Все города</option>

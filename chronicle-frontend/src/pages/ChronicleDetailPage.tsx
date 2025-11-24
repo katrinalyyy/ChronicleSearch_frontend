@@ -22,18 +22,14 @@ const ChronicleDetailPage: FC = () => {
         setPageData(data)
       })
     }
-    loadCartInfo()
+    // Корзину загружаем только при клике, не при загрузке страницы
   }, [id])
 
   // Загрузка информации о корзине
   const loadCartInfo = () => {
     getChronicleResearchDraft()
       .then((data) => {
-        if (data) {
-          setCartCount(data.count)
-        } else {
-          setCartCount(0)
-        }
+        setCartCount(data.count)
       })
       .catch(() => {
         setCartCount(0)

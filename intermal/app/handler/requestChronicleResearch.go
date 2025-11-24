@@ -19,19 +19,34 @@ func (h *Handler) GetDraftRequestInfoAPI(ctx *gin.Context) {
 	// Получаем UUID пользователя из контекста
 	userUUIDStr, exists := middleware.GetUserUUID(ctx)
 	if !exists {
-		h.errorHandler(ctx, http.StatusUnauthorized, fmt.Errorf("user UUID not found in context"))
+		// Для неавторизованных пользователей возвращаем пустую корзину вместо ошибки
+		ctx.JSON(http.StatusOK, gin.H{
+			"status":     "success",
+			"request_id": 0,
+			"count":      0,
+		})
 		return
 	}
 
 	userUUID, err := uuid.Parse(userUUIDStr)
 	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, fmt.Errorf("invalid user UUID"))
+		// Если UUID невалиден, также возвращаем пустую корзину
+		ctx.JSON(http.StatusOK, gin.H{
+			"status":     "success",
+			"request_id": 0,
+			"count":      0,
+		})
 		return
 	}
 
 	requestID, count, err := h.Repository.GetDraftRequestInfo(userUUID)
 	if err != nil {
-		h.errorHandler(ctx, http.StatusInternalServerError, err)
+		// В случае ошибки БД возвращаем пустую корзину
+		ctx.JSON(http.StatusOK, gin.H{
+			"status":     "success",
+			"request_id": 0,
+			"count":      0,
+		})
 		return
 	}
 

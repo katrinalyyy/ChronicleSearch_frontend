@@ -118,23 +118,20 @@
   margin-bottom: 60px;
 }
 
-/* При ширине > 1200px показываем 3 колонки */
 @media (min-width: 1200px) {
   .chronicles-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-/* При ширине 992px - 1199px показываем 2 колонки */
 @media (min-width: 992px) and (max-width: 1199px) {
   .chronicles-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* При ширине 768px - 991px показываем 2 колонки */
 @media (min-width: 768px) and (max-width: 991px) {
-  /* Убираем ограничение Bootstrap Container */
+  /* минус Bootstrap Container */
   .chronicles-container .container {
     max-width: 100% !important;
     padding-left: 10px !important;
@@ -151,7 +148,7 @@
     margin: 0 !important;
   }
   
-  /* Убираем Bootstrap Col - делаем элемент обычным div */
+  /* минус Bootstrap Col - делаем элемент обычным div */
   .chronicles-grid > * {
     display: contents;
   }
