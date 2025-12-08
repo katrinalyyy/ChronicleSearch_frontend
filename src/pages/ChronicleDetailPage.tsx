@@ -1,19 +1,26 @@
 import { type FC, useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { Row, Col, Spinner, Image } from 'react-bootstrap'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Row, Col, Spinner, Image, Button } from 'react-bootstrap'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import Breadcrumbs from '../components/Breadcrumbs'
 import ResearchCartButton from '../components/ResearchCartButton'
-import { getChronicleById, getChronicleResearchDraft, type ChronicleResource } from '../modules/chronicleApi'
+import { getChronicleById, type ChronicleResource } from '../modules/chronicleApi'
 import { ROUTES, ROUTE_LABELS } from '../Routes'
+import { useAppSelector, useAppDispatch } from '../store/hooks'
+import { getDraftRequestInfo, addChronicleToRequest } from '../store/draftRequestSlice'
 import { defaultImage } from '../constants/defaultImage'
 import './ChronicleDetailPage.css'
 
 const ChronicleDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>()
   const [pageData, setPageData] = useState<ChronicleResource | null>(null)
-  const [cartCount, setCartCount] = useState(0)
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  
+  // Redux state для корзины
+  const { count: cartCount, request_id } = useAppSelector((state) => state.draftRequest)
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
 
   useEffect(() => {
     // Загрузка данных летописи при монтировании компонента
@@ -22,30 +29,65 @@ const ChronicleDetailPage: FC = () => {
         setPageData(data)
       })
     }
-    // Корзину загружаем только при клике, не при загрузке страницы
   }, [id])
 
-  // Загрузка информации о корзине
-  const loadCartInfo = () => {
-    getChronicleResearchDraft()
-      .then((data) => {
-        setCartCount(data.count)
-      })
-      .catch(() => {
-        setCartCount(0)
-      })
-  }
+  useEffect(() => {
+    // Загружаем корзину при монтировании, если пользователь авторизован
+    if (isAuthenticated) {
+      // Всегда загружаем корзину, чтобы получить актуальное состояние
+      dispatch(getDraftRequestInfo())
+    }
+  }, [isAuthenticated, dispatch])
+  
+  // Отладочный вывод для проверки состояния корзины
+  useEffect(() => {
+    console.log('ChronicleDetailPage - cartCount:', cartCount, 'request_id:', request_id, 'isAuthenticated:', isAuthenticated)
+  }, [cartCount, request_id, isAuthenticated])
 
   // Обработчик клика на корзину
-  const handleCartClick = () => {
-    console.log('Cart clicked - sending GET request to /api/ChronicleRequestList/chronicle_draft')
-    loadCartInfo() // Перезагружаем информацию о корзине
+  const handleCartClick = async () => {
+    console.log('handleCartClick called - request_id:', request_id, 'cartCount:', cartCount)
+    if (request_id && request_id > 0) {
+      console.log('Navigating to request:', request_id)
+      navigate(`${ROUTES.REQUEST}/${request_id}`)
+    } else if (isAuthenticated) {
+      // Если пользователь авторизован, но request_id нет, загружаем корзину
+      console.log('Loading cart info...')
+      try {
+        const result = await dispatch(getDraftRequestInfo()).unwrap()
+        console.log('Cart info loaded:', result)
+        if (result.request_id && result.request_id > 0) {
+          navigate(`${ROUTES.REQUEST}/${result.request_id}`)
+        } else {
+          console.log('No valid request_id found')
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке корзины:', error)
+      }
+    } else {
+      console.log('User not authenticated')
+    }
+  }
+
+  // Обработчик добавления летописи в заявку
+  const handleAddToRequest = async () => {
+    if (pageData?.id) {
+      try {
+        await dispatch(addChronicleToRequest(pageData.id)).unwrap()
+      } catch (error) {
+        console.error('Ошибка при добавлении в заявку:', error)
+      }
+    }
   }
 
   return (
     <>
       <Header />
-      <ResearchCartButton count={cartCount} onClick={handleCartClick} />
+      <ResearchCartButton 
+        count={cartCount} 
+        onClick={handleCartClick}
+        disabled={!isAuthenticated}
+      />
       
       {/* Пример использования BreadCrumbs на странице летописи (название получаем из запроса) */}
       <Breadcrumbs
@@ -59,10 +101,34 @@ const ChronicleDetailPage: FC = () => {
         {pageData ? (
           // Если данные загружены, отображаем контент
           <main className="chronicle-details">
-            <h2 className="chronicle-title">{pageData.title}</h2>
-
             <div className="chronicle-content">
+              <div className="chronicle-header">
+                <h2 className="chronicle-title">{pageData.title}</h2>
+                {isAuthenticated && (
+                  <Button 
+                    variant="danger" 
+                    className="add-button"
+                    onClick={handleAddToRequest}
+                  >
+                    Добавить
+                  </Button>
+                )}
+              </div>
               <Row>
+                <Col md={6}>
+                  <div className="chronicle-image-wrapper">
+                    <div className="chronicle-image">
+                      <Image
+                        src={pageData.image || defaultImage}
+                        alt="Изображение летописи"
+                        className="chronicle-detail-image"
+                        onError={(e) => {
+                          e.currentTarget.src = defaultImage
+                        }}
+                      />
+                    </div>
+                  </div>
+                </Col>
                 <Col md={6}>
                   <div className="chronicle-specs">
                     <div className="spec-item">
@@ -92,19 +158,6 @@ const ChronicleDetailPage: FC = () => {
                         <strong>Основные редакции:</strong> {pageData.detailed_editions}
                       </div>
                     )}
-                  </div>
-                </Col>
-                <Col md={6}>
-                  <div className="chronicle-image">
-                    <Image
-                      src={pageData.image || defaultImage}
-                      alt="Изображение летописи"
-                      width={400}
-                      onError={(e) => {
-                        // Если изображение не загрузилось, показываем дефолтное
-                        e.currentTarget.src = defaultImage
-                      }}
-                    />
                   </div>
                 </Col>
               </Row>

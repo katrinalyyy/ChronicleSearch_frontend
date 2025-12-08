@@ -1,4 +1,5 @@
 import { type FC } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../Routes'
 import './Breadcrumbs.css'
@@ -27,7 +28,7 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = (props) => {
       {/* Остальные крошки */}
       {!!crumbs.length &&
         crumbs.map((crumb, index) => (
-          <span key={index}>
+          <React.Fragment key={index}>
             <li className="slash">/</li>
             {index === crumbs.length - 1 ? (
               // Последняя крошка - не активна (текущая страница)
@@ -38,7 +39,7 @@ export const Breadcrumbs: FC<BreadcrumbsProps> = (props) => {
                 <Link to={crumb.path || ''}>{crumb.label}</Link>
               </li>
             )}
-          </span>
+          </React.Fragment>
         ))}
     </ul>
   )

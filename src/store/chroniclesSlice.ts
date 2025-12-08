@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { api } from '../api';
-import { Lab1IntermalAppDsChronicleResource } from '../api/Api';
+import type { Lab1IntermalAppDsChronicleResource } from '../api/Api';
+import { setRequestId, setCount } from './draftRequestSlice';
 
 interface ChroniclesState {
   searchValue: string;
@@ -20,8 +21,8 @@ const initialState: ChroniclesState = {
 
 export const getChroniclesList = createAsyncThunk(
   'chronicles/getChroniclesList',
-  async (_, { getState, rejectWithValue }) => {
-    const { chronicles }: any = getState();
+  async (_, { getState, dispatch, rejectWithValue }) => {
+    const { chronicles, auth }: any = getState();
     try {
       const response = await api.api.chronicleResourcesList({
         title: chronicles.searchValue || undefined,
@@ -30,6 +31,25 @@ export const getChroniclesList = createAsyncThunk(
 
       // API возвращает { status: "success", data: [...] }
       if (response.data?.status === 'success' && response.data?.data) {
+        // Если пользователь авторизован, загружаем информацию о черновике
+        // НО только если request_id еще не установлен (чтобы не перезаписывать после добавления)
+        if (auth.isAuthenticated) {
+          try {
+            const draftResponse = await api.api.chronicleRequestListChronicleDraftList();
+            if (draftResponse.data?.status === 'success') {
+              const requestId = draftResponse.data.request_id || 0;
+              const count = draftResponse.data.count || 0;
+              // Обновляем только если request_id еще не установлен или равен 0
+              const currentState: any = getState();
+              if (!currentState.draftRequest.request_id || currentState.draftRequest.request_id === 0) {
+                dispatch(setRequestId(requestId));
+                dispatch(setCount(count));
+              }
+            }
+          } catch (draftError) {
+            // Игнорируем ошибки черновика - не обновляем, если уже есть данные
+          }
+        }
         return response.data.data;
       }
       return [];

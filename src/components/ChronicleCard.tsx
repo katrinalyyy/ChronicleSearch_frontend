@@ -1,16 +1,18 @@
 import { type FC } from 'react'
 import { Card } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-import { type Lab1IntermalAppDsChronicleResource } from '../api/Api'
+import type { Lab1IntermalAppDsChronicleResource } from '../api/Api'
 import { defaultImage } from '../constants/defaultImage'
 import './ChronicleCard.css'
 
 interface Props {
   chronicle: Lab1IntermalAppDsChronicleResource
   imageClickHandler?: () => void
+  onAddToRequest?: () => void
+  showAddButton?: boolean
 }
 
-const ChronicleCard: FC<Props> = ({ chronicle, imageClickHandler }) => {
+const ChronicleCard: FC<Props> = ({ chronicle, imageClickHandler, onAddToRequest, showAddButton = false }) => {
   // Проверяем что id существует
   if (!chronicle.id) {
     return null
@@ -47,6 +49,14 @@ const ChronicleCard: FC<Props> = ({ chronicle, imageClickHandler }) => {
           </div>
         </div>
         <div className="chronicle-card-actions">
+          {showAddButton && onAddToRequest && (
+            <button 
+              className="btn-details"
+              onClick={onAddToRequest}
+            >
+              Добавить
+            </button>
+          )}
           <Link to={`/chronicle/${chronicle.id}`} className="btn-details">
             Подробнее
           </Link>

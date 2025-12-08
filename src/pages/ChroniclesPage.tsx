@@ -1,4 +1,4 @@
-import { type FC, useState, useEffect } from 'react'
+import { type FC, useEffect } from 'react'
 import { Container, Row, Col, Form, Button } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
@@ -6,41 +6,85 @@ import Footer from '../components/Footer'
 import ChronicleCard from '../components/ChronicleCard'
 import Breadcrumbs from '../components/Breadcrumbs'
 import ResearchCartButton from '../components/ResearchCartButton'
-import { getChronicleResearchDraft } from '../modules/chronicleApi'
 import { ROUTE_LABELS } from '../Routes'
 import { useAppSelector, useAppDispatch } from '../store/hooks'
 import { setSearchValue, setSelectedLocation, getChroniclesList } from '../store/chroniclesSlice'
+import { getDraftRequestInfo, addChronicleToRequest } from '../store/draftRequestSlice'
 import './ChroniclesPage.css'
 
 const ChroniclesPage: FC = () => {
-  // Redux state для хроник
+  /**
+   * REDUX: Чтение данных из store с помощью useAppSelector
+   * 
+   * useAppSelector - это хук, который подписывает компонент на изменения в Redux store.
+   * Когда выбранная часть state изменяется, компонент автоматически перерендерится.
+   * 
+   * Селектор функция (state) => state.chronicles.searchValue:
+   * - Получает весь state
+   * - Возвращает нужную часть (state.chronicles.searchValue)
+   * - Компонент получает только это значение
+   */
+  // Читаем данные из Redux store для летописей
   const searchValue = useAppSelector((state) => state.chronicles.searchValue)
   const selectedLocation = useAppSelector((state) => state.chronicles.selectedLocation)
   const chronicles = useAppSelector((state) => state.chronicles.chronicles)
   const loading = useAppSelector((state) => state.chronicles.loading)
-  const dispatch = useAppDispatch()
   
-  // Локальный state для корзины
-  const [cartCount, setCartCount] = useState(0)
+  // Читаем данные из Redux store для корзины (черновика заявки)
+  const { count: cartCount, request_id } = useAppSelector((state) => state.draftRequest)
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
+  
+  // Отладочный вывод
+  useEffect(() => {
+    console.log('ChroniclesPage - cartCount:', cartCount, 'request_id:', request_id, 'isAuthenticated:', isAuthenticated)
+  }, [cartCount, request_id, isAuthenticated])
+  
+  /**
+   * REDUX: Получение функции dispatch для отправки actions
+   * 
+   * dispatch используется для:
+   * 1. Отправки синхронных actions (изменение состояния напрямую)
+   * 2. Отправки асинхронных thunks (API запросы через Axios)
+   */
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  // Загрузка летописей при монтировании компонента
+  /**
+   * REDUX + AXIOS: Загрузка данных при монтировании компонента
+   * 
+   * useEffect вызывается после первого рендера компонента.
+   * dispatch(getChroniclesList()) - отправляет async thunk, который:
+   * 1. Устанавливает loading: true в Redux state
+   * 2. Выполняет Axios GET запрос на /api/chronicle_resources
+   * 3. При успехе - сохраняет данные в Redux state (chronicles: [...])
+   * 4. При ошибке - сохраняет ошибку в Redux state (error: "...")
+   * 5. Устанавливает loading: false
+   * 
+   * Компонент автоматически перерендерится, когда данные загрузятся,
+   * так как он подписан на state.chronicles через useAppSelector.
+   */
   useEffect(() => {
+    // Отправляем async thunk для загрузки списка летописей
+    // Внутри getChroniclesList выполняется Axios запрос через api.api.chronicleResourcesList()
     dispatch(getChroniclesList())
+    
+    // Загружаем корзину, если пользователь авторизован
+    // getDraftRequestInfo() - async thunk, который делает Axios GET запрос
+    if (isAuthenticated && (!request_id || request_id === 0)) {
+      dispatch(getDraftRequestInfo())
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isAuthenticated])
 
-  // Загрузка информации о корзине
-  const loadCartInfo = () => {
-    getChronicleResearchDraft()
-      .then((data) => {
-        setCartCount(data.count)
-      })
-      .catch(() => {
-        setCartCount(0)
-      })
-  }
-
+  /**
+   * Обработчик поиска - пример отправки action при действии пользователя
+   * 
+   * При отправке формы:
+   * 1. dispatch(getChroniclesList()) - отправляет async thunk
+   * 2. Thunk выполняет Axios запрос с текущими фильтрами (searchValue, selectedLocation)
+   * 3. Результат сохраняется в Redux state
+   * 4. Компонент перерендеривается с новыми данными
+   */
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     dispatch(getChroniclesList())
@@ -58,14 +102,28 @@ const ChroniclesPage: FC = () => {
 
   // Обработчик клика на корзину
   const handleCartClick = () => {
-    console.log('Cart clicked - sending GET request to /api/ChronicleRequestList/chronicle_draft')
-    loadCartInfo() // Перезагружаем информацию о корзине
+    // Используем request_id из state, а не запрашиваем заново
+    if (request_id && request_id > 0) {
+      navigate(`/request/${request_id}`)
+    } else {
+      console.log('Cannot navigate to request - request_id:', request_id)
+    }
+  }
+
+  // Обработчик добавления хроники в заявку
+  const handleAddToRequest = async (chronicleId: number) => {
+    await dispatch(addChronicleToRequest(chronicleId))
+    // getDraftRequestInfo уже вызывается внутри addChronicleToRequest
   }
 
   return (
     <>
       <Header />
-      <ResearchCartButton count={cartCount} onClick={handleCartClick} />
+      <ResearchCartButton 
+        count={cartCount} 
+        onClick={handleCartClick}
+        disabled={!isAuthenticated}
+      />
       <div className={`chronicles-container ${loading ? 'loading' : ''}`}>
         {loading && (
           <div className="loading-overlay">
@@ -121,6 +179,8 @@ const ChroniclesPage: FC = () => {
                   <ChronicleCard 
                     chronicle={chronicle}
                     imageClickHandler={() => chronicle.id && handleCardClick(chronicle.id)}
+                    onAddToRequest={chronicle.id ? () => handleAddToRequest(chronicle.id!) : undefined}
+                    showAddButton={isAuthenticated}
                   />
                 </Col>
               ))}

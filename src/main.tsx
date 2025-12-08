@@ -6,10 +6,14 @@ import { store } from './store/store'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
 
-// Импортируем страницы (пока заглушки, создадим далее)
+// Импортируем страницы
 import HomePage from './pages/HomePage'
 import ChroniclesPage from './pages/ChroniclesPage'
 import ChronicleDetailPage from './pages/ChronicleDetailPage'
+import LoginPage from './pages/LoginPage'
+import RequestPage from './pages/RequestPage'
+import RequestsListPage from './pages/RequestsListPage'
+import UserProfilePage from './pages/UserProfilePage'
 
 const router = createBrowserRouter([
   {
@@ -23,6 +27,22 @@ const router = createBrowserRouter([
   {
     path: '/chronicle/:id',
     element: <ChronicleDetailPage />,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/request/:requestId',
+    element: <RequestPage />,
+  },
+  {
+    path: '/requests',
+    element: <RequestsListPage />,
+  },
+  {
+    path: '/profile',
+    element: <UserProfilePage />,
   },
 ], {
   basename: import.meta.env.BASE_URL
