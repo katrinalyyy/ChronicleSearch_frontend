@@ -6,7 +6,7 @@ import Footer from '../components/Footer'
 import ChronicleCard from '../components/ChronicleCard'
 import Breadcrumbs from '../components/Breadcrumbs'
 import ResearchCartButton from '../components/ResearchCartButton'
-import { ROUTE_LABELS } from '../Routes'
+import { ROUTES, ROUTE_LABELS } from '../Routes'
 import { useAppSelector, useAppDispatch } from '../store/hooks'
 import { setSearchValue, setSelectedLocation, getChroniclesList } from '../store/chroniclesSlice'
 import { getDraftRequestInfo, addChronicleToRequest } from '../store/draftRequestSlice'
@@ -102,11 +102,11 @@ const ChroniclesPage: FC = () => {
 
   // Обработчик клика на корзину
   const handleCartClick = () => {
-    // Используем request_id из state, а не запрашиваем заново
-    if (request_id && request_id > 0) {
-      navigate(`/request/${request_id}`)
+    // Если корзина пустая, переходим на страницу черновика
+    if (!request_id || request_id === 0 || cartCount === 0) {
+      navigate(ROUTES.DRAFT)
     } else {
-      console.log('Cannot navigate to request - request_id:', request_id)
+      navigate(`/request/${request_id}`)
     }
   }
 

@@ -38,6 +38,9 @@ const Header: FC = () => {
                 <Nav.Link as={Link} to={ROUTES.REQUESTS_LIST} className="nav-link-custom">
                   Мои заявки
                 </Nav.Link>
+                <Nav.Link as={Link} to={ROUTES.DRAFT} className="nav-link-custom">
+                  Черновик
+                </Nav.Link>
                 <Nav.Link as={Link} to={ROUTES.USER_PROFILE} className="nav-link-custom">
                   {username}
                 </Nav.Link>
@@ -46,9 +49,11 @@ const Header: FC = () => {
                 </Button>
               </>
             ) : (
-              <Button variant="outline-light" as={Link} to={ROUTES.LOGIN} className="ms-2">
-                Войти
-              </Button>
+              <Link to={ROUTES.LOGIN} className="ms-2">
+                <Button variant="outline-light">
+                  Войти
+                </Button>
+              </Link>
             )}
           </Nav>
         </Navbar.Collapse>

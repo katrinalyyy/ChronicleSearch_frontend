@@ -46,26 +46,15 @@ const ChronicleDetailPage: FC = () => {
 
   // Обработчик клика на корзину
   const handleCartClick = async () => {
-    console.log('handleCartClick called - request_id:', request_id, 'cartCount:', cartCount)
-    if (request_id && request_id > 0) {
-      console.log('Navigating to request:', request_id)
+    // Если корзина пустая, переходим на страницу черновика
+    if (!request_id || request_id === 0 || cartCount === 0) {
+      navigate(ROUTES.DRAFT)
+      return
+    }
+    
+    // Если есть request_id, переходим на страницу заявки
+    if (isAuthenticated) {
       navigate(`${ROUTES.REQUEST}/${request_id}`)
-    } else if (isAuthenticated) {
-      // Если пользователь авторизован, но request_id нет, загружаем корзину
-      console.log('Loading cart info...')
-      try {
-        const result = await dispatch(getDraftRequestInfo()).unwrap()
-        console.log('Cart info loaded:', result)
-        if (result.request_id && result.request_id > 0) {
-          navigate(`${ROUTES.REQUEST}/${result.request_id}`)
-        } else {
-          console.log('No valid request_id found')
-        }
-      } catch (error) {
-        console.error('Ошибка при загрузке корзины:', error)
-      }
-    } else {
-      console.log('User not authenticated')
     }
   }
 

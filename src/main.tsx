@@ -14,6 +14,7 @@ import LoginPage from './pages/LoginPage'
 import RequestPage from './pages/RequestPage'
 import RequestsListPage from './pages/RequestsListPage'
 import UserProfilePage from './pages/UserProfilePage'
+import DraftPage from './pages/DraftPage'
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
   {
     path: '/profile',
     element: <UserProfilePage />,
+  },
+  {
+    path: '/draft',
+    element: <DraftPage />,
   },
 ], {
   basename: import.meta.env.BASE_URL

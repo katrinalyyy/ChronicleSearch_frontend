@@ -20,25 +20,7 @@ const initialState: AuthState = {
   role: null,
 };
 
-// Загрузка токена из localStorage при инициализации
-const loadTokenFromStorage = (): string | null => {
-  try {
-    return localStorage.getItem('auth_token');
-  } catch {
-    return null;
-  }
-};
-
-// Загрузка username из localStorage
-const loadUsernameFromStorage = (): string => {
-  try {
-    return localStorage.getItem('auth_username') || '';
-  } catch {
-    return '';
-  }
-};
-
-// Сохранение токена в localStorage
+// Сохранение токена в localStorage (только для очистки при logout)
 const saveTokenToStorage = (token: string | null) => {
   try {
     if (token) {
@@ -84,39 +66,20 @@ const saveUsernameToStorage = (username: string | null) => {
  * @param rejectWithValue - функция для возврата ошибки в формате, понятном Redux
  */
 export const loginUserAsync = createAsyncThunk(
-  'auth/loginUserAsync', // Префикс для action типов: auth/loginUserAsync/pending, fulfilled, rejected
+  'auth/loginUserAsync', 
   async (credentials: IntermalAppHandlerLoginReq, { rejectWithValue }) => {
     try {
-      // AXIOS ЗАПРОС: Отправка POST запроса на /login
-      // api.login.loginCreate - это метод из сгенерированного API клиента
-      // Axios автоматически добавляет заголовок Authorization, если токен установлен
       const response = await api.login.loginCreate(credentials);
-      
-      // AXIOS ОТВЕТ: Axios оборачивает ответ сервера в объект response
-      // response.data содержит данные, возвращенные сервером
-      // response.status содержит HTTP статус код (200, 404, 500 и т.д.)
-      // response.headers содержит заголовки ответа
       const accessToken = response.data?.access_token;
-      
       if (accessToken) {
         const username = credentials.login || '';
-        // Сохраняем токен и username в localStorage для персистентности
-        saveTokenToStorage(accessToken);
-        saveUsernameToStorage(username);
-        
-        // Устанавливаем токен в Axios клиент для автоматической подстановки в заголовки
+        // НЕ сохраняем в localStorage - авторизация должна слетать при F5
         updateApiToken(accessToken);
-        
-        // ДОПОЛНИТЕЛЬНЫЙ AXIOS ЗАПРОС: Загружаем роль пользователя
-        // Это пример цепочки запросов - сначала авторизация, потом получение профиля
         let userRole: number | null = null;
         try {
-          // api.api.userProfileList() - GET запрос на /api/user/profile
-          // Axios автоматически добавит Authorization: Bearer <token>
           const profileResponse = await api.api.userProfileList();
           console.log('userProfileList full response:', profileResponse);
           console.log('userProfileList response.data:', profileResponse.data);
-          // Проверяем разные возможные структуры ответа
           const role = profileResponse.data?.role ?? profileResponse.data?.data?.role;
           if (role !== undefined && role !== null) {
             userRole = typeof role === 'number' ? role : parseInt(String(role), 10);
@@ -142,7 +105,6 @@ export const loginUserAsync = createAsyncThunk(
   }
 );
 
-// Асинхронное действие для деавторизации
 export const logoutUserAsync = createAsyncThunk(
   'auth/logoutUserAsync',
   async (_, { rejectWithValue }) => {
@@ -153,7 +115,6 @@ export const logoutUserAsync = createAsyncThunk(
       updateApiToken(null);
       return null;
     } catch (error: any) {
-      // Даже если запрос не удался, очищаем локальное состояние
       saveTokenToStorage(null);
       saveUsernameToStorage(null);
       updateApiToken(null);
@@ -162,23 +123,14 @@ export const logoutUserAsync = createAsyncThunk(
   }
 );
 
-// Инициализация токена и username из localStorage
-const initialToken = loadTokenFromStorage();
-const initialUsername = loadUsernameFromStorage();
-
-// Инициализируем токен в API при загрузке
-if (initialToken) {
-  updateApiToken(initialToken);
-}
+// НЕ загружаем токен из localStorage - авторизация должна слетать при F5
+// Очищаем localStorage при загрузке, если там что-то осталось
+saveTokenToStorage(null);
+saveUsernameToStorage(null);
 
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    ...initialState,
-    token: initialToken,
-    username: initialUsername,
-    isAuthenticated: !!initialToken,
-  },
+  initialState,
   reducers: {
     clearError: (state) => {
       state.error = null;
@@ -208,6 +160,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.token = null;
         state.username = '';
+        // Очищаем localStorage на случай, если там что-то осталось
         saveTokenToStorage(null);
         saveUsernameToStorage(null);
       })

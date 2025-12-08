@@ -29,17 +29,13 @@ export const getChroniclesList = createAsyncThunk(
         location: chronicles.selectedLocation || undefined,
       });
 
-      // API возвращает { status: "success", data: [...] }
       if (response.data?.status === 'success' && response.data?.data) {
-        // Если пользователь авторизован, загружаем информацию о черновике
-        // НО только если request_id еще не установлен (чтобы не перезаписывать после добавления)
         if (auth.isAuthenticated) {
           try {
             const draftResponse = await api.api.chronicleRequestListChronicleDraftList();
             if (draftResponse.data?.status === 'success') {
               const requestId = draftResponse.data.request_id || 0;
               const count = draftResponse.data.count || 0;
-              // Обновляем только если request_id еще не установлен или равен 0
               const currentState: any = getState();
               if (!currentState.draftRequest.request_id || currentState.draftRequest.request_id === 0) {
                 dispatch(setRequestId(requestId));

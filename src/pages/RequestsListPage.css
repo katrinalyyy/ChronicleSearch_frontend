@@ -84,14 +84,72 @@
   font-size: 16px;
   font-weight: bold;
   transition: all 0.3s ease;
+  background-color: #850000 !important;
+  border-color: #850000 !important;
+  color: white !important;
 }
 
 .draft-button:hover:not(:disabled) {
   transform: scale(1.05);
+  background-color: #a00000 !important;
+  border-color: #a00000 !important;
 }
 
 .draft-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+}
+
+/* Стили для формы фильтрации */
+.requests-list-container form {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.requests-list-container form .form-label {
+  font-weight: 600;
+  color: #850000;
+  margin-bottom: 8px;
+}
+
+.requests-list-container form .form-control,
+.requests-list-container form .form-select {
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  padding: 10px;
+  transition: border-color 0.3s ease;
+}
+
+.requests-list-container form .form-control:focus,
+.requests-list-container form .form-select:focus {
+  border-color: #850000;
+  box-shadow: 0 0 0 0.2rem rgba(133, 0, 0, 0.25);
+}
+
+.requests-list-container form .btn {
+  padding: 10px 20px;
+  font-weight: 600;
+}
+
+/* Кнопка "Применить" - бордовый цвет */
+.requests-list-container form .btn[type="submit"] {
+  background-color: #850000 !important;
+  border-color: #850000 !important;
+  color: white !important;
+}
+
+.requests-list-container form .btn[type="submit"]:hover:not(:disabled) {
+  background-color: #a00000 !important;
+  border-color: #a00000 !important;
+}
+
+.requests-list-container form .btn[type="submit"]:disabled {
+  opacity: 0.6;
+  background-color: #850000 !important;
+  border-color: #850000 !important;
 }
 

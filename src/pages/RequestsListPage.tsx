@@ -1,40 +1,50 @@
 import { type FC, useEffect, useState } from 'react'
-import { Container, Table, Spinner, Alert, Button } from 'react-bootstrap'
+import { Container, Table, Spinner, Alert, Button, Form, Row, Col } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { ROUTES, ROUTE_LABELS } from '../Routes'
 import { useAppSelector, useAppDispatch } from '../store/hooks'
-import { getRequestsList, getDraftRequestInfo } from '../store/draftRequestSlice'
+import { getRequestsList } from '../store/draftRequestSlice'
 import './RequestsListPage.css'
 
 const RequestsListPage: FC = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
-  const userRole = useAppSelector((state) => state.auth.role)
-  const isModerator = userRole === 1
   
-  const { requestsList, requestsListLoading, requestsListError, request_id } = useAppSelector((state) => state.draftRequest)
-  const [draftRequestId, setDraftRequestId] = useState<number | null>(null)
+  const { requestsList, requestsListLoading, requestsListError } = useAppSelector((state) => state.draftRequest)
+  
+  // Состояние фильтров
+  const [startDate, setStartDate] = useState<string>('')
+  const [endDate, setEndDate] = useState<string>('')
+  const [status, setStatus] = useState<string>('')
 
   useEffect(() => {
     if (isAuthenticated) {
+      // Загружаем заявки без фильтров при первой загрузке
       dispatch(getRequestsList())
-      // Загружаем информацию о черновике для кнопки
-      dispatch(getDraftRequestInfo()).then((result) => {
-        if (result.type === 'draftRequest/getDraftRequestInfo/fulfilled') {
-          const payload = result.payload as any
-          if (payload?.request_id && payload.request_id > 0) {
-            setDraftRequestId(payload.request_id)
-          } else {
-            setDraftRequestId(null)
-          }
-        }
-      })
     }
   }, [isAuthenticated, dispatch])
+
+  // Обработчик применения фильтров
+  const handleFilterSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const filters: { status?: string; start_date?: string; end_date?: string } = {}
+    if (status) filters.status = status
+    if (startDate) filters.start_date = startDate
+    if (endDate) filters.end_date = endDate
+    dispatch(getRequestsList(Object.keys(filters).length > 0 ? filters : undefined))
+  }
+
+  // Обработчик сброса фильтров
+  const handleFilterReset = () => {
+    setStartDate('')
+    setEndDate('')
+    setStatus('')
+    dispatch(getRequestsList())
+  }
 
   const getStatusLabel = (status: number | string | undefined): string => {
     if (typeof status === 'number') {
@@ -114,21 +124,6 @@ const RequestsListPage: FC = () => {
       <Container className="requests-list-container">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1 className="requests-list-title mb-0">Список заявок</h1>
-          {/* Кнопка "Перейти к черновику" только для исследователей (не модераторов) */}
-          {!isModerator && (
-            <Button
-              variant={draftRequestId ? "danger" : "secondary"}
-              onClick={() => {
-                if (draftRequestId) {
-                  navigate(`${ROUTES.REQUEST}/${draftRequestId}`)
-                }
-              }}
-              disabled={!draftRequestId}
-              className="draft-button"
-            >
-              {draftRequestId ? 'Перейти к черновику' : 'Черновик отсутствует'}
-            </Button>
-          )}
         </div>
 
         {requestsListLoading && (
@@ -142,6 +137,53 @@ const RequestsListPage: FC = () => {
             {requestsListError}
           </Alert>
         )}
+
+        {/* Форма фильтрации */}
+        <Form onSubmit={handleFilterSubmit} className="mb-4">
+          <Row className="g-3 align-items-end">
+            <Col md={3}>
+              <Form.Label>Дата начала</Form.Label>
+              <Form.Control
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </Col>
+            <Col md={3}>
+              <Form.Label>Дата окончания</Form.Label>
+              <Form.Control
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                min={startDate || undefined}
+              />
+            </Col>
+            <Col md={3}>
+              <Form.Label>Статус</Form.Label>
+              <Form.Select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="">Все статусы</option>
+                <option value="черновик">Черновик</option>
+                <option value="сформирован">Сформирован</option>
+                <option value="завершён">Завершён</option>
+                <option value="отклонён">Отклонён</option>
+                <option value="удалён">Удалён</option>
+              </Form.Select>
+            </Col>
+            <Col md={3}>
+              <div className="d-flex gap-2">
+                <Button variant="danger" type="submit" disabled={requestsListLoading}>
+                  Применить
+                </Button>
+                <Button variant="outline-secondary" type="button" onClick={handleFilterReset}>
+                  Сбросить
+                </Button>
+              </div>
+            </Col>
+          </Row>
+        </Form>
 
         {!requestsListLoading && !requestsListError && (
           <>
@@ -196,36 +238,46 @@ const RequestsListPage: FC = () => {
                           : 'Не указана'}
                       </td>
                       <td>
-                        {request.formed_at 
-                          ? (() => {
-                              // Обрабатываем SqlNullTime структуру
-                              const formedAt = request.formed_at as any;
-                              if (formedAt && typeof formedAt === 'object') {
-                                // Проверяем valid и используем time
-                                if (formedAt.valid && formedAt.time) {
-                                  try {
-                                    const date = new Date(formedAt.time);
-                                    if (!isNaN(date.getTime())) {
-                                      return date.toLocaleDateString('ru-RU');
-                                    }
-                                  } catch (e) {
-                                    console.error('Date parsing error:', e, formedAt.time);
-                                  }
+                        {(() => {
+                          const formedAt = request.formed_at;
+                          if (!formedAt) {
+                            return '-';
+                          }
+                          
+                          // Обрабатываем SqlNullTime структуру
+                          if (typeof formedAt === 'object' && formedAt !== null) {
+                            // Проверяем разные варианты структуры (Valid/Time или valid/time)
+                            const isValid = (formedAt as any).Valid !== undefined 
+                              ? (formedAt as any).Valid 
+                              : (formedAt as any).valid;
+                            const timeValue = (formedAt as any).Time || (formedAt as any).time;
+                            
+                            if (isValid && timeValue) {
+                              try {
+                                const date = new Date(timeValue);
+                                if (!isNaN(date.getTime())) {
+                                  return date.toLocaleDateString('ru-RU');
                                 }
-                              } else if (typeof formedAt === 'string') {
-                                // Если это строка напрямую
-                                try {
-                                  const date = new Date(formedAt);
-                                  if (!isNaN(date.getTime())) {
-                                    return date.toLocaleDateString('ru-RU');
-                                  }
-                                } catch (e) {
-                                  console.error('Date parsing error:', e, formedAt);
-                                }
+                              } catch (e) {
+                                console.error('Date parsing error:', e, timeValue, 'formedAt:', formedAt);
                               }
-                              return '-';
-                            })()
-                          : '-'}
+                            } else {
+                              // Логируем для отладки, если valid=false или time отсутствует
+                              console.log('formed_at structure:', formedAt, 'isValid:', isValid, 'timeValue:', timeValue);
+                            }
+                          } else if (typeof formedAt === 'string') {
+                            // Если это строка напрямую
+                            try {
+                              const date = new Date(formedAt);
+                              if (!isNaN(date.getTime())) {
+                                return date.toLocaleDateString('ru-RU');
+                              }
+                            } catch (e) {
+                              console.error('Date parsing error:', e, formedAt);
+                            }
+                          }
+                          return '-';
+                        })()}
                       </td>
                     </tr>
                   ))}

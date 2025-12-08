@@ -7,6 +7,7 @@ export const ROUTES = {
   REQUEST: '/request',
   REQUESTS_LIST: '/requests',
   USER_PROFILE: '/profile',
+  DRAFT: '/draft',
 }
 
 // Тип для ключей маршрутов
@@ -21,5 +22,6 @@ export const ROUTE_LABELS: Record<RouteKeyType, string> = {
   REQUEST: 'Заявка',
   REQUESTS_LIST: 'Список заявок',
   USER_PROFILE: 'Личный кабинет',
+  DRAFT: 'Черновик',
 }
 

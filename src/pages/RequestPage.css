@@ -224,6 +224,15 @@
   padding: 0 5px;
 }
 
+.col-availability > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 450px;
+  justify-content: center;
+}
+
 .availability-input {
   width: 100%;
   max-width: 350px;
@@ -235,6 +244,7 @@
   color: #594949;
   font-size: 16px;
   outline: none;
+  flex: 1;
 }
 
 .availability-input::placeholder {
@@ -306,6 +316,29 @@
 .delete-chronicle-btn:hover {
   background-color: #a00000;
   transform: scale(1.05);
+}
+
+.save-quote-btn {
+  background-color: #ACA4A4;
+  color: #594949;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.save-quote-btn:hover:not(:disabled) {
+  background-color: #9a9393;
+  transform: scale(1.05);
+}
+
+.save-quote-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .save-button {

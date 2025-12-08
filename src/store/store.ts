@@ -34,6 +34,8 @@ export const store = configureStore({
     auth: authReducer,             // Состояние авторизации (токен, username, роль)
     draftRequest: draftRequestReducer, // Состояние черновика заявки (корзина)
   },
+  // Явно включаем Redux DevTools (всегда включено в dev режиме)
+  devTools: true,
 })
 
 /**

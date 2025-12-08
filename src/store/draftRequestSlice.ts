@@ -51,43 +51,29 @@ const initialState: DraftRequestState = {
   requestsListError: null,
 };
 
-// Асинхронное действие для получения информации о черновике
 export const getDraftRequestInfo = createAsyncThunk(
   'draftRequest/getDraftRequestInfo',
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.api.chronicleRequestListChronicleDraftList();
-      
       console.log('getDraftRequestInfo full response:', response);
       console.log('getDraftRequestInfo response.data:', response.data);
       console.log('getDraftRequestInfo response.data type:', typeof response.data);
-      
-      // Axios оборачивает ответ в response.data
-      // API возвращает { status: "success", request_id: X, count: Y }
       const data = response.data;
-      
-      // Проверяем разные варианты структуры
       let requestId = 0;
       let count = 0;
-      
       if (data?.status === 'success') {
-        // Вариант 1: { status: "success", request_id: X, count: Y }
         requestId = data.request_id ?? 0;
         count = data.count ?? 0;
-        
-        // Вариант 2: { status: "success", data: { request_id: X, count: Y } }
         if (requestId === 0 && data.data) {
           requestId = data.data.request_id ?? 0;
           count = data.data.count ?? 0;
         }
       } else {
-        // Пробуем извлечь напрямую без проверки status
         requestId = data?.request_id ?? 0;
         count = data?.count ?? 0;
       }
-      
       console.log('Final parsed - request_id:', requestId, 'count:', count);
-      
       return {
         request_id: requestId,
         count: count,
@@ -100,7 +86,6 @@ export const getDraftRequestInfo = createAsyncThunk(
   }
 );
 
-// Получение данных заявки
 export const getRequestDetail = createAsyncThunk(
   'draftRequest/getRequestDetail',
   async (requestId: number, { rejectWithValue }) => {
@@ -109,29 +94,18 @@ export const getRequestDetail = createAsyncThunk(
       console.log('getRequestDetail response:', response);
       console.log('getRequestDetail response.data:', response.data);
       console.log('getRequestDetail response.data structure:', JSON.stringify(response.data, null, 2));
-      
-      // API может возвращать данные в разных форматах:
-      // 1. { status: 'success', chronicles: Array, request: {...} }
-      // 2. { status: 'success', data: { chronicles: Array, request: {...} } }
-      // 3. Прямой объект { chronicles: Array, request: {...} }
       let resultData = response.data;
-      
       if (resultData?.status === 'success') {
-        // Если данные в data, используем их, иначе используем сам response.data
         resultData = resultData.data || resultData;
       }
-      
-      // Проверяем, что есть хотя бы request или chronicles
       if (!resultData || (!resultData.request && !resultData.chronicles && !resultData.chronicle_research)) {
         console.warn('getRequestDetail - invalid data structure:', resultData);
         return rejectWithValue('Неверный формат данных заявки');
       }
-      
       console.log('getRequestDetail - returning data:', resultData);
       return resultData;
     } catch (error: any) {
       console.error('getRequestDetail error:', error);
-      // Если 403, возможно, пользователь не авторизован или нет доступа
       if (error.response?.status === 403) {
         return rejectWithValue('Нет доступа к этой заявке. Проверьте авторизацию.');
       }
@@ -158,26 +132,12 @@ export const addChronicleToRequest = createAsyncThunk(
   'draftRequest/addChronicleToRequest',
   async (chronicleId: number, { getState, rejectWithValue }) => {
     try {
-      /**
-       * AXIOS ЗАПРОС #1: Добавление хроники в заявку
-       * 
-       * api.api.chronicleResourcesAddToChronicleRequestCreate(chronicleId)
-       * - Выполняет POST запрос на /api/chronicle_resources/{id}/add_to_request
-       * - Axios автоматически добавляет Authorization: Bearer <token>
-       * - Возвращает Promise с response объектом
-       */
       const response = await api.api.chronicleResourcesAddToChronicleRequestCreate(chronicleId);
       console.log('addChronicleToRequest response:', response.data);
-      
       const responseData = response.data;
-      
-      // Если в ответе есть request_id, запрашиваем детальную информацию о заявке
       if (responseData?.request_id) {
         const requestId = responseData.request_id;
-        
-        // Небольшая задержка, чтобы сервер успел обработать запрос
         await new Promise(resolve => setTimeout(resolve, 300));
-        
         /**
          * AXIOS ЗАПРОС #2: Получение детальной информации о заявке
          * 
@@ -187,13 +147,8 @@ export const addChronicleToRequest = createAsyncThunk(
         try {
           const detailResponse = await api.api.chronicleRequestListDetail(requestId);
           console.log('getRequestDetail after add response:', detailResponse.data);
-          
-          // Структура ответа: { status: 'success', chronicles: Array, request: {...} }
           const detailData = detailResponse.data;
           console.log('detailData structure:', detailData);
-          
-          // Подсчитываем количество хроник в заявке
-          // chronicles может быть напрямую в ответе или в data
           let chronicles = detailData?.chronicles;
           if (!chronicles && detailData?.data?.chronicles) {
             chronicles = detailData.data.chronicles;
@@ -201,17 +156,13 @@ export const addChronicleToRequest = createAsyncThunk(
           if (!chronicles && detailData?.data?.chronicle_research) {
             chronicles = detailData.data.chronicle_research;
           }
-          
           const count = Array.isArray(chronicles) ? chronicles.length : 0;
-          
           console.log('Calculated count from detail:', count, 'chronicles array length:', chronicles?.length, 'chronicles:', chronicles);
-          
           const result = {
             request_id: requestId,
             count: count,
             responseData: responseData,
           };
-          
           console.log('addChronicleToRequest returning:', result);
           return result;
         } catch (detailError) {

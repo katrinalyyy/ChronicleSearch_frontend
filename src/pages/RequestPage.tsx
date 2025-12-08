@@ -184,14 +184,13 @@ const RequestPage: FC = () => {
     }
   }
 
-  // Обработчик изменения цитаты
-  const handleQuoteChange = async (chronicleId: number, quote: string) => {
+  // Обработчик сохранения цитаты (только при нажатии кнопки)
+  const handleSaveQuote = async (chronicleId: number, quote: string) => {
     if (request_id && isAuthenticated) {
-      // Обновляем локально сразу для быстрого отклика
-      dispatch(updateChronicleQuoteLocal({ chronicleId, quote }))
-      // Сохраняем на сервере
       try {
         await dispatch(updateChronicleQuote({ requestId: request_id, chronicleId, quote })).unwrap()
+        // Показываем сообщение об успешном сохранении (опционально)
+        // Можно добавить toast или временное сообщение
       } catch (error) {
         dispatch(setError(String(error)))
       }
@@ -350,22 +349,30 @@ const RequestPage: FC = () => {
                   <div className="col-time">{chronicle.time_of_action || 'Не указано'}</div>
                   <div className="col-place">{chronicle.location || 'Не указано'}</div>
                   <div className="col-availability">
-                    <input 
-                      type="text" 
-                      placeholder="Цитата" 
-                      className="availability-input"
-                      value={item.quote || ''}
-                      onChange={(e) => {
-                        const quote = e.target.value
-                        dispatch(updateChronicleQuoteLocal({ chronicleId: chronicle.id!, quote }))
-                      }}
-                      onBlur={(e) => {
-                        if (chronicle.id && request_id) {
-                          handleQuoteChange(chronicle.id, e.target.value)
-                        }
-                      }}
-                      disabled={!isAuthenticated}
-                    />
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <input 
+                        type="text" 
+                        placeholder="Цитата" 
+                        className="availability-input"
+                        value={item.quote || ''}
+                        onChange={(e) => {
+                          const quote = e.target.value
+                          dispatch(updateChronicleQuoteLocal({ chronicleId: chronicle.id!, quote }))
+                        }}
+                        disabled={!isAuthenticated}
+                        style={{ flex: 1 }}
+                      />
+                      {chronicle.id && isAuthenticated && isDraft && (
+                        <button
+                          className="save-quote-btn"
+                          onClick={() => handleSaveQuote(chronicle.id!, item.quote || '')}
+                          disabled={loading}
+                          title="Сохранить цитату"
+                        >
+                          Сохранить
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="col-status">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center' }}>
