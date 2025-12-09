@@ -24,3 +24,7 @@
 
 # Go
 vendor/
+node_modules
+
+# Дубликат фронтенда (рабочая папка - chronicle-frontend/src/)
+/src/

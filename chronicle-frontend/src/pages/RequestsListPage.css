@@ -1,0 +1,155 @@
+.requests-list-container {
+  max-width: 1400px;
+  margin: 40px auto;
+  padding: 0 20px;
+  min-height: calc(100vh - 70px - 140px - 80px);
+}
+
+.requests-list-title {
+  color: #850000;
+  font-size: 36px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+}
+
+.requests-table {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.requests-table thead {
+  background-color: #850000;
+  color: white;
+}
+
+.requests-table thead th {
+  border: none;
+  padding: 15px;
+  font-weight: 600;
+}
+
+.requests-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.requests-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.requests-table tbody td {
+  padding: 15px;
+  vertical-align: middle;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-draft {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.status-formed {
+  background-color: #17a2b8;
+  color: #fff;
+}
+
+.status-completed {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.status-rejected {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.status-deleted {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.draft-button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  background-color: #850000 !important;
+  border-color: #850000 !important;
+  color: white !important;
+}
+
+.draft-button:hover:not(:disabled) {
+  transform: scale(1.05);
+  background-color: #a00000 !important;
+  border-color: #a00000 !important;
+}
+
+.draft-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+}
+
+/* Стили для формы фильтрации */
+.requests-list-container form {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.requests-list-container form .form-label {
+  font-weight: 600;
+  color: #850000;
+  margin-bottom: 8px;
+}
+
+.requests-list-container form .form-control,
+.requests-list-container form .form-select {
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  padding: 10px;
+  transition: border-color 0.3s ease;
+}
+
+.requests-list-container form .form-control:focus,
+.requests-list-container form .form-select:focus {
+  border-color: #850000;
+  box-shadow: 0 0 0 0.2rem rgba(133, 0, 0, 0.25);
+}
+
+.requests-list-container form .btn {
+  padding: 10px 20px;
+  font-weight: 600;
+}
+
+/* Кнопка "Применить" - бордовый цвет */
+.requests-list-container form .btn[type="submit"] {
+  background-color: #850000 !important;
+  border-color: #850000 !important;
+  color: white !important;
+}
+
+.requests-list-container form .btn[type="submit"]:hover:not(:disabled) {
+  background-color: #a00000 !important;
+  border-color: #a00000 !important;
+}
+
+.requests-list-container form .btn[type="submit"]:disabled {
+  opacity: 0.6;
+  background-color: #850000 !important;
+  border-color: #850000 !important;
+}
+
